@@ -4,3 +4,13 @@ Initialized: 2026-02-06T00:00:00Z
 PRD: prd.json (23 stories)
 
 ---
+## Iteration 1 — S01-scaffold — Project scaffolding and build toolchain
+Date: 2026-02-07T23:43:25Z
+- Replaced template counter with minimal Feliz app in `src/App.fs` rendering "Hello ElmishPaint" and Tailwind utility classes.
+- Renamed source/test files to `App.fs` and `App.test.fs`, updated `src/ElmishPaint.fsproj` compile order, and updated `src/Main.fs` render target.
+- Added `vite-plugin-fable` to Vite config and dependencies; switched scripts to `vite dev`, `vite build`, and non-watch `pnpm test`.
+- Fixed stale transpiled test artifacts by changing clean script to `dotnet fable clean src -e fs.jsx --yes`.
+- Suppressed NuGet audit warning noise in this environment by setting `<NuGetAudit>false</NuGetAudit>` in `src/ElmishPaint.fsproj`.
+- Verification run results: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, and `dotnet fantomas --check src/` all pass.
+- Gotchas: sandbox blocks jj commit mutations (`jj desc`/`jj new`) due `.git/objects` write restrictions; pnpm/corepack needs writable cache env + Node 24 selection in this environment.
+- AGENTS.md updates made: added a Discovered Patterns note that clean must use `-e fs.jsx` to avoid stale transpiled test artifacts.

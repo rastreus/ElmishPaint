@@ -196,3 +196,12 @@ out
 *.fs.jsx
 *.fs.jsx.map
 fable_modules/
+
+# Vite build output
+dist/
+
+# Ralph agent artifacts
+.ralph-codex-output.txt
+.ralph-branch
+
+.pnpm-store/

@@ -17,7 +17,7 @@
         "TailwindCSS utility classes are functional in the rendered output",
         ".fsproj lists all .fs files in correct dependency order"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S02-types",
@@ -46,7 +46,7 @@
         "Out-of-bounds getPixel returns White",
         "Out-of-bounds setPixel is a no-op (no crash)",
         "clone produces a deep copy — mutations to clone do not affect original",
-        "Expecto unit tests verify all acceptance criteria",
+        "Vitest unit tests verify all acceptance criteria",
         "dotnet fable src compiles with zero warnings"
       ],
       "passes": false
@@ -62,23 +62,23 @@
         "toImageData at scale 2 produces 1024x684 ImageData with 2x2 pixel blocks",
         "fromImageData correctly thresholds to 1-bit",
         "Round-trip: fromImageData(toImageData 1 canvas) produces identical BitCanvas",
-        "Expecto unit tests verify all acceptance criteria"
+        "Vitest unit tests verify all acceptance criteria"
       ],
       "passes": false
     },
     {
       "id": "S05-elmish-runtime",
       "spec": "Spec 2",
-      "title": "Elmish runtime wiring with React.useElmish",
+      "title": "Elmish runtime wiring with Feliz.UseElmish",
       "priority": 5,
-      "description": "Implement Update.fs with a skeleton update function that exhaustively matches all Msg cases (returning model unchanged + Cmd.none for each). Wire App.fs with React.useElmish(init, update, [||]). The init function returns a default Model with a blank BitCanvas. Verify dispatching a message triggers a re-render.",
+      "description": "Implement Update.fs with a skeleton update function that exhaustively matches all Msg cases (returning model unchanged + Cmd.none for each). Wire App.fs with Feliz.UseElmish(init, update, [||]). The init function returns a default Model with a blank BitCanvas. Verify dispatching a message triggers a re-render.",
       "acceptanceCriteria": [
         "update function exhaustively matches all Msg cases (zero compiler warnings)",
         "init returns a valid default Model with blank canvas",
-        "React.useElmish wiring compiles and renders",
+        "Feliz.UseElmish wiring compiles and renders",
         "Dispatching SelectTool changes model.Tool and triggers re-render",
         "Cmd.none produces no side effects",
-        "Expecto tests verify update is pure: same input → same output",
+        "Vitest tests verify update is pure: same input → same output",
         "dotnet fable src compiles with zero warnings"
       ],
       "passes": false
@@ -88,7 +88,7 @@
       "spec": "Spec 3",
       "title": "Canvas rendering at 1x zoom",
       "priority": 6,
-      "description": "Implement CanvasView.fs: a ReactComponent that renders BitCanvas onto an HTML5 canvas element at 1x zoom (512x342 pixels). Use React.useRef for canvas element reference and React.useEffect for rendering lifecycle. Mouse events on the canvas dispatch CanvasMouseDown/Move/Up with correct pixel coordinates.",
+      "description": "Implement CanvasView.fs: a Feliz v3 ReactComponent that renders BitCanvas onto an HTML5 canvas element at 1x zoom (512x342 pixels). Use React.useRef for canvas element reference and React.useEffect for rendering lifecycle. Mouse events on the canvas dispatch CanvasMouseDown/Move/Up with correct pixel coordinates.",
       "acceptanceCriteria": [
         "Canvas element renders at 512x342 pixels",
         "Rendered output matches BitCanvas pixel-for-pixel",
@@ -125,8 +125,8 @@
         "Polarity is locked for the entire stroke duration",
         "Fast diagonal movement produces a continuous line with no gaps",
         "Stroke is committed to BitCanvas on mouse-up",
-        "Expecto tests verify Bresenham produces correct pixels for known inputs",
-        "Expecto tests verify pencil polarity locking"
+        "Vitest tests verify Bresenham produces correct pixels for known inputs",
+        "Vitest tests verify pencil polarity locking"
       ],
       "passes": false
     },
@@ -144,7 +144,7 @@
         "Undo past beginning of history is a no-op",
         "Redo with empty redo stack is a no-op",
         "Undo/redo does not change tool selection, zoom, or non-canvas state",
-        "Expecto tests verify all acceptance criteria"
+        "Vitest tests verify all acceptance criteria"
       ],
       "passes": false
     },
@@ -160,7 +160,7 @@
         "Dragging across black region leaves continuous white trail with no gaps",
         "Changing brush size takes effect on next stroke, not mid-stroke",
         "Eraser strokes are single undo entries",
-        "Expecto tests verify eraser behavior at each brush size"
+        "Vitest tests verify eraser behavior at each brush size"
       ],
       "passes": false
     },
@@ -175,7 +175,7 @@
         "45-degree line has no gaps",
         "Preview is visible over both black and white regions",
         "Releasing mouse commits the line as a single undo entry",
-        "Expecto tests verify line endpoints and pixel count for known inputs"
+        "Vitest tests verify line endpoints and pixel count for known inputs"
       ],
       "passes": false
     },
@@ -191,7 +191,7 @@
         "Filled rectangle with dither pattern fills correctly",
         "Preview shown during drag",
         "Rectangle is single undo entry",
-        "Expecto tests verify outline and filled rectangle pixel output"
+        "Vitest tests verify outline and filled rectangle pixel output"
       ],
       "passes": false
     },
@@ -207,7 +207,7 @@
         "Filling entire blank canvas completes without crash or hang",
         "Filling single isolated pixel works",
         "Flood fill is single undo entry",
-        "Expecto tests verify fill boundaries and pattern application"
+        "Vitest tests verify fill boundaries and pattern application"
       ],
       "passes": false
     },
@@ -221,7 +221,7 @@
         "All 12 patterns defined as 8x8 bool arrays",
         "Pattern.sample returns correct bit for any global (x,y) coordinate",
         "Pattern alignment is global — shifting a shape shifts its pattern content",
-        "Expecto tests verify each pattern tile and sampling at boundary coordinates"
+        "Vitest tests verify each pattern tile and sampling at boundary coordinates"
       ],
       "passes": false
     },
@@ -299,8 +299,8 @@
         "Atkinson output matches expected algorithm: 6/8 error diffusion pattern",
         "Threshold offset parameter visibly changes output",
         "Output is a valid BitCanvas",
-        "Expecto tests verify dithering output for known small input images",
-        "Expecto tests verify 6/8 diffusion pattern (not 16/16 Floyd-Steinberg)"
+        "Vitest tests verify dithering output for known small input images",
+        "Vitest tests verify 6/8 diffusion pattern (not 16/16 Floyd-Steinberg)"
       ],
       "passes": false
     },

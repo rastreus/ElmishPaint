@@ -1,3 +1,9 @@
+---
+name: feliz-v3
+description: "**REQUIRED** - Always activate before writing ANY Feliz, React, or Elmish UI code. This project uses Feliz v3 which has BREAKING CHANGES from v2. Training data contains v2 patterns that WILL cause compilation errors. Covers: component syntax, React.memo, React.lazy, useElmish, context providers, PascalCase APIs, and Fable 5 transpilation."
+allowed-tools: Bash(dotnet *), Bash(pnpm *), Bash(npx *)
+---
+
 # Feliz v3 — Agent Reference Guide
 
 > **CRITICAL**: This project uses Feliz v3, Fable 5, .NET 10, and React 19.

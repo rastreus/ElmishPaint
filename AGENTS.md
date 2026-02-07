@@ -353,7 +353,10 @@ git-cliff --output CHANGELOG.md
 > pattern, convention, or gotcha that future iterations need to know, add it
 > here and commit as `docs(agents): add <pattern description>`.
 
-*(Empty — will be populated during development.)*
+- `dotnet fable clean` must include the same extension used by transpilation.
+  For this repo (`-e fs.jsx`), use `dotnet fable clean src -e fs.jsx --yes`
+  or stale `*.fs.jsx` test artifacts may remain and produce false-positive test
+  runs.
 
 ---
 

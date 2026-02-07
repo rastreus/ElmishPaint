@@ -34,9 +34,10 @@ CODEX_OUTPUT_FILE=".ralph-codex-output.txt"
 CODEX_FLAGS=(
   exec
   --full-auto
-  -m "gpt-5.3-codex"
-  -c 'model_reasoning_effort="xhigh"'
-  -c 'sandbox_workspace_write.network_access=true'
+  --model gpt-5.3-codex
+  -c model_reasoning_effort=high
+  -c sandbox_workspace_write.network_access=true
+  --json
   -o "$CODEX_OUTPUT_FILE"
 )
 
@@ -93,8 +94,8 @@ remaining() {
 # ── Main loop ────────────────────────────────────────────────────────
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║  Ralph Loop — ElmishPaint (Codex)                            ║"
-echo "║  Max iterations: $MAX_ITERATIONS                             ║"
-echo "║  Remaining stories: $(remaining)                             ║"
+echo "║  Max iterations: $MAX_ITERATIONS                                          ║"
+echo "║  Remaining stories: $(remaining)                                       ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -157,7 +158,7 @@ Implement story **${NEXT_STORY}**: "${NEXT_TITLE}"
    - pnpm build (production build must succeed)
    - dotnet fantomas --check src/ (formatting must pass)
 8. When all acceptance criteria are met:
-   - Update prd.json: set this story's "passes" to true.
+   - Update prd.json: set the story "passes" field to true.
    - Append a concise progress entry to progress.txt.
    - Commit prd.json and progress.txt changes.
 9. ONLY work on story ${NEXT_STORY}. Do not work on other stories.
