@@ -1,0 +1,6 @@
+# ElmishPaint — Ralph Progress Log
+
+Initialized: 2026-02-06T00:00:00Z
+PRD: prd.json (23 stories)
+
+---

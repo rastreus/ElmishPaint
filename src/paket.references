@@ -1,0 +1,15 @@
+group ElmishPaint
+    FSharp.Core
+    Feliz
+    Feliz.UseElmish
+    Elmish
+    Fable.Elmish
+    Fable.Elmish.React
+    Fable.Elmish.HMR
+    Fable.Browser.Dom
+    Fable.Browser.Event
+    Fable.Promise
+    Vitest
+    Vitest.JestDom
+    Vitest.ReactTestingLibrary
+    Vitest.UserEvent
