@@ -34,6 +34,8 @@ CODEX_OUTPUT_FILE=".ralph-codex-output.txt"
 CODEX_FLAGS=(
   exec
   --full-auto
+  -m "gpt-5.3-codex"
+  -c 'model_reasoning_effort="xhigh"'
   -c 'sandbox_workspace_write.network_access=true'
   -o "$CODEX_OUTPUT_FILE"
 )
@@ -90,9 +92,9 @@ remaining() {
 
 # ── Main loop ────────────────────────────────────────────────────────
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  Ralph Loop — ElmishPaint (Codex)                          ║"
-echo "║  Max iterations: $MAX_ITERATIONS                                        ║"
-echo "║  Remaining stories: $(remaining)                                      ║"
+echo "║  Ralph Loop — ElmishPaint (Codex)                            ║"
+echo "║  Max iterations: $MAX_ITERATIONS                             ║"
+echo "║  Remaining stories: $(remaining)                             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 

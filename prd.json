@@ -1,0 +1,371 @@
+{
+  "projectName": "ElmishPaint",
+  "branchName": "feat/elmishpaint-mvp",
+  "description": "A 1-bit monochrome pixel art editor built with F#, Fable, Elmish, and Feliz. Homage to MacPaint targeting the Macintosh Classic II 512x342 monochrome display.",
+  "userStories": [
+    {
+      "id": "S01-scaffold",
+      "spec": "Project Setup",
+      "title": "Project scaffolding and build toolchain",
+      "priority": 1,
+      "description": "Initialize the project with F# (.fsproj), package.json, Vite config (with vite-plugin-fable), TailwindCSS config, index.html entry point, and a minimal App.fs that renders 'Hello ElmishPaint' via Feliz. The project must compile via Fable and serve via Vite dev server.",
+      "acceptanceCriteria": [
+        "dotnet fable src compiles with zero warnings",
+        "npx vite build produces a working production bundle",
+        "npx vite dev serves the app with HMR",
+        "The browser displays 'Hello ElmishPaint' rendered by a Feliz React component",
+        "TailwindCSS utility classes are functional in the rendered output",
+        ".fsproj lists all .fs files in correct dependency order"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S02-types",
+      "spec": "Spec 1, 2",
+      "title": "Core type definitions: Bit, Tool, Pattern, Modifiers, Model, Msg",
+      "priority": 2,
+      "description": "Define all shared types in Types.fs, Model.fs, and Msg.fs. This includes Bit (White|Black), Tool DU, Pattern record, Modifiers record, MouseState, UIState, HistoryState, Selection, ImportPreview, the top-level Model record, and the complete Msg discriminated union. No implementation — only type definitions.",
+      "acceptanceCriteria": [
+        "All types from the PRD are defined and compile",
+        "Msg DU includes all cases: SelectTool, SelectPattern, CanvasMouseDown/Move/Up, Undo, Redo, ClearSelection, MoveSelection, StampSelection, ImportImage, ImportPreviewReady, ConfirmImport, CancelImport, ExportPNG, SetZoom, ScrollCanvas, KeyDown",
+        "Model record includes all fields: Canvas, Tool, ToolOptions, Pattern, Mouse, Selection, History, UI, ImportPreview",
+        ".fsproj file order is correct: Types.fs before Model.fs before Msg.fs",
+        "dotnet fable src compiles with zero warnings"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S03-bitcanvas",
+      "spec": "Spec 1",
+      "title": "BitCanvas data structure and core operations",
+      "priority": 3,
+      "description": "Implement BitCanvas.fs: the 512x342 packed bit array backed by Uint8Array. Implement create, getPixel, setPixel, clear, fill, clone. Out-of-bounds getPixel returns White, out-of-bounds setPixel is a no-op.",
+      "acceptanceCriteria": [
+        "BitCanvas.create() produces a 512x342 all-white canvas",
+        "getPixel and setPixel correctly address all 175,104 pixels",
+        "Out-of-bounds getPixel returns White",
+        "Out-of-bounds setPixel is a no-op (no crash)",
+        "clone produces a deep copy — mutations to clone do not affect original",
+        "Expecto unit tests verify all acceptance criteria",
+        "dotnet fable src compiles with zero warnings"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S04-bitcanvas-imagedata",
+      "spec": "Spec 1",
+      "title": "BitCanvas toImageData and fromImageData",
+      "priority": 4,
+      "description": "Implement toImageData (with integer scale factor) and fromImageData (threshold to 1-bit). toImageData at scale 1 produces 512x342 ImageData. At scale 2, each pixel becomes a 2x2 block. Round-trip fromImageData(toImageData 1 canvas) must be identical.",
+      "acceptanceCriteria": [
+        "toImageData at scale 1 produces 512x342 ImageData with correct black/white values",
+        "toImageData at scale 2 produces 1024x684 ImageData with 2x2 pixel blocks",
+        "fromImageData correctly thresholds to 1-bit",
+        "Round-trip: fromImageData(toImageData 1 canvas) produces identical BitCanvas",
+        "Expecto unit tests verify all acceptance criteria"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S05-elmish-runtime",
+      "spec": "Spec 2",
+      "title": "Elmish runtime wiring with React.useElmish",
+      "priority": 5,
+      "description": "Implement Update.fs with a skeleton update function that exhaustively matches all Msg cases (returning model unchanged + Cmd.none for each). Wire App.fs with React.useElmish(init, update, [||]). The init function returns a default Model with a blank BitCanvas. Verify dispatching a message triggers a re-render.",
+      "acceptanceCriteria": [
+        "update function exhaustively matches all Msg cases (zero compiler warnings)",
+        "init returns a valid default Model with blank canvas",
+        "React.useElmish wiring compiles and renders",
+        "Dispatching SelectTool changes model.Tool and triggers re-render",
+        "Cmd.none produces no side effects",
+        "Expecto tests verify update is pure: same input → same output",
+        "dotnet fable src compiles with zero warnings"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S06-canvas-render",
+      "spec": "Spec 3",
+      "title": "Canvas rendering at 1x zoom",
+      "priority": 6,
+      "description": "Implement CanvasView.fs: a ReactComponent that renders BitCanvas onto an HTML5 canvas element at 1x zoom (512x342 pixels). Use React.useRef for canvas element reference and React.useEffect for rendering lifecycle. Mouse events on the canvas dispatch CanvasMouseDown/Move/Up with correct pixel coordinates.",
+      "acceptanceCriteria": [
+        "Canvas element renders at 512x342 pixels",
+        "Rendered output matches BitCanvas pixel-for-pixel",
+        "Mouse events dispatch correct pixel coordinates",
+        "Setting a pixel via update and re-rendering shows the change",
+        "dotnet fable src compiles with zero warnings"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S07-canvas-zoom",
+      "spec": "Spec 3",
+      "title": "Canvas zoom levels and coordinate mapping",
+      "priority": 7,
+      "description": "Extend CanvasView to support zoom levels 1x, 2x, 4x, 8x. At zoom N, canvas element is 512*N x 342*N pixels. Mouse coordinates are correctly divided by zoom to map to BitCanvas pixel coordinates. Optional pixel grid overlay at zoom >= 4x.",
+      "acceptanceCriteria": [
+        "At 8x zoom, individual pixels are clearly visible as 8x8 blocks",
+        "Mouse position correctly maps to canvas pixel coordinates at every zoom level",
+        "Drawing at high zoom produces same result as drawing at 1x on same pixel",
+        "Pixel grid overlay visible at zoom >= 4x, not visible below",
+        "SetZoom message changes zoom level and re-renders correctly"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S08-pencil",
+      "spec": "Spec 4a",
+      "title": "Pencil tool with Bresenham line drawing",
+      "priority": 8,
+      "description": "Implement Pencil.fs and the Bresenham line algorithm in Algorithms.fs. Pencil toggles pixel polarity on mouse-down (white→draws black for entire stroke, black→draws white). Consecutive mouse-move events use Bresenham interpolation for gap-free lines. Stroke is committed to BitCanvas on mouse-up.",
+      "acceptanceCriteria": [
+        "Clicking a white pixel turns it black",
+        "Clicking a black pixel turns it white",
+        "Polarity is locked for the entire stroke duration",
+        "Fast diagonal movement produces a continuous line with no gaps",
+        "Stroke is committed to BitCanvas on mouse-up",
+        "Expecto tests verify Bresenham produces correct pixels for known inputs",
+        "Expecto tests verify pencil polarity locking"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S09-undo-redo",
+      "spec": "Spec 5",
+      "title": "Undo/redo with immutable history stacks",
+      "priority": 9,
+      "description": "Implement History module: push, undo, redo, canUndo, canRedo. History stores BitCanvas snapshots with max depth of 50. Every tool stroke pushes previous canvas onto undo stack. Undo pops undo stack, pushes current to redo. New edit after undo clears redo stack.",
+      "acceptanceCriteria": [
+        "Drawing a stroke then Undo restores pre-stroke canvas exactly",
+        "Undo then Redo restores the stroke",
+        "Drawing after undo clears redo stack",
+        "50 sequential operations can all be undone",
+        "Undo past beginning of history is a no-op",
+        "Redo with empty redo stack is a no-op",
+        "Undo/redo does not change tool selection, zoom, or non-canvas state",
+        "Expecto tests verify all acceptance criteria"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S10-eraser",
+      "spec": "Spec 4b",
+      "title": "Eraser tool with configurable brush size",
+      "priority": 10,
+      "description": "Implement Eraser.fs. Eraser sets pixels to White along stroke path. Configurable square brush sizes: 1x1, 2x2, 4x4, 8x8. Uses Bresenham interpolation between mouse-move events. Brush size selectable from ToolOptions.",
+      "acceptanceCriteria": [
+        "At 1x1, eraser draws white pixels like an inverted pencil",
+        "At 8x8, a single click clears an 8x8 block",
+        "Dragging across black region leaves continuous white trail with no gaps",
+        "Changing brush size takes effect on next stroke, not mid-stroke",
+        "Eraser strokes are single undo entries",
+        "Expecto tests verify eraser behavior at each brush size"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S11-line-tool",
+      "spec": "Spec 4c",
+      "title": "Line tool with XOR preview",
+      "priority": 11,
+      "description": "Implement Line.fs. Click sets start point, drag shows XOR preview line, release commits using Bresenham. Preview inverts pixels so line is visible on both black and white backgrounds.",
+      "acceptanceCriteria": [
+        "Horizontal line from (0,100) to (511,100) produces exactly 512 black pixels",
+        "45-degree line has no gaps",
+        "Preview is visible over both black and white regions",
+        "Releasing mouse commits the line as a single undo entry",
+        "Expecto tests verify line endpoints and pixel count for known inputs"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S12-rectangle",
+      "spec": "Spec 4d",
+      "title": "Rectangle and Filled Rectangle tools",
+      "priority": 12,
+      "description": "Implement Rectangle.fs. Two modes: outline (1px border, hollow) and filled. Click sets one corner, drag to opposite, release commits. Filled rectangle uses the active Pattern. Preview shown during drag.",
+      "acceptanceCriteria": [
+        "Outline rectangle from (10,10) to (50,50) is 41x41 pixels, 1px border, hollow",
+        "Filled rectangle with solid black pattern fills entire region",
+        "Filled rectangle with dither pattern fills correctly",
+        "Preview shown during drag",
+        "Rectangle is single undo entry",
+        "Expecto tests verify outline and filled rectangle pixel output"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S13-flood-fill",
+      "spec": "Spec 4e",
+      "title": "Flood fill with iterative algorithm",
+      "priority": 13,
+      "description": "Implement FloodFill.fs using an iterative (not recursive) flood fill algorithm. Fills contiguous same-color region. Respects active Pattern. Must handle full 512x342 canvas without stack overflow.",
+      "acceptanceCriteria": [
+        "Filling white region surrounded by black fills only enclosed area",
+        "Filling with pattern produces correct tiled pattern in region",
+        "Filling entire blank canvas completes without crash or hang",
+        "Filling single isolated pixel works",
+        "Flood fill is single undo entry",
+        "Expecto tests verify fill boundaries and pattern application"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S14-patterns",
+      "spec": "Spec 6",
+      "title": "Pattern definitions and sampling",
+      "priority": 14,
+      "description": "Implement Patterns.fs with all 12 built-in 8x8 patterns: solid black, solid white, 50% checkerboard, 25% dot, 75% dot, horizontal stripes, vertical stripes, diagonal stripes (left/right), crosshatch, brick, polka dot. Implement the sample function for global-coordinate pattern lookup.",
+      "acceptanceCriteria": [
+        "All 12 patterns defined as 8x8 bool arrays",
+        "Pattern.sample returns correct bit for any global (x,y) coordinate",
+        "Pattern alignment is global — shifting a shape shifts its pattern content",
+        "Expecto tests verify each pattern tile and sampling at boundary coordinates"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S15-pattern-palette",
+      "spec": "Spec 6, 10",
+      "title": "Pattern palette UI component",
+      "priority": 15,
+      "description": "Implement PatternPalette.fs: a grid of pattern swatches. Each swatch renders the 8x8 tile tiled into a small preview. Clicking a swatch dispatches SelectPattern. Active pattern is visually highlighted.",
+      "acceptanceCriteria": [
+        "All 12+ patterns displayed as visually distinct swatches",
+        "Active pattern has distinct visual highlight",
+        "Clicking a swatch dispatches SelectPattern and updates model",
+        "Filled rectangle and flood fill use the selected pattern"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S16-marquee",
+      "spec": "Spec 7",
+      "title": "Marquee selection: select, move, stamp",
+      "priority": 16,
+      "description": "Implement Marquee.fs. Click-drag selects rectangular region with marching ants border. Selected region lifts (original area becomes white). Arrow keys move selection by 1px. Clicking outside stamps. Escape returns to original position. Delete clears. Full cycle is single undo entry.",
+      "acceptanceCriteria": [
+        "Dragging shows marching ants around selection boundary",
+        "Selected region lifts — original area becomes white",
+        "Arrow keys move selection by exactly 1px per press",
+        "Stamping merges floating pixels with canvas at new position",
+        "Off-canvas pixels are clipped",
+        "Escape returns selection to original position and stamps",
+        "Delete clears selection area",
+        "Full select-move-stamp is one undo entry",
+        "Marching ants animate smoothly"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S17-toolbar",
+      "spec": "Spec 10",
+      "title": "Toolbar, zoom controls, and status bar",
+      "priority": 17,
+      "description": "Implement Toolbar.fs, StatusBar.fs, and integrate layout in App.fs. Toolbar has all 7 tool buttons with active highlight, eraser brush size selector. Zoom controls (1x/2x/4x/8x). Status bar shows mouse coordinates. Undo/redo buttons enabled/disabled by history state. Import/export action buttons.",
+      "acceptanceCriteria": [
+        "All 7 tools selectable with distinct active state",
+        "Eraser brush size selector appears when eraser is active",
+        "Zoom controls change canvas display zoom",
+        "Status bar shows correct pixel coordinates on mouse move",
+        "Undo/redo buttons enabled/disabled based on history state",
+        "Import and export actions accessible from UI",
+        "Layout does not break at 1280x720 and above"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S18-keyboard",
+      "spec": "Spec 11",
+      "title": "Keyboard shortcuts",
+      "priority": 18,
+      "description": "Set up keyboard subscription via React.useEffect on document keydown. Dispatch KeyDown messages. Handle all shortcuts: P/E/L/R/F/M for tools, Ctrl+Z/Ctrl+Shift+Z for undo/redo, Ctrl+S/Ctrl+Shift+S for export, Ctrl+I for import, Delete/Backspace for clear selection, Escape for cancel, 1/2/3/4 for zoom, arrows for selection move.",
+      "acceptanceCriteria": [
+        "Each shortcut triggers documented action",
+        "Shortcuts do not fire when text input is focused",
+        "Ctrl+S prevents browser save dialog",
+        "Shortcuts discoverable via tooltips on toolbar buttons"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S19-dithering",
+      "spec": "Spec 8",
+      "title": "Atkinson dithering algorithm",
+      "priority": 19,
+      "description": "Implement Dithering.fs with the Atkinson dithering algorithm. Input: float array (grayscale), width, height, threshold offset. Output: BitCanvas. Atkinson distributes 6/8 of error (not full Floyd-Steinberg). Implement grayscale conversion and image scaling to fit 512x342.",
+      "acceptanceCriteria": [
+        "Atkinson output matches expected algorithm: 6/8 error diffusion pattern",
+        "Threshold offset parameter visibly changes output",
+        "Output is a valid BitCanvas",
+        "Expecto tests verify dithering output for known small input images",
+        "Expecto tests verify 6/8 diffusion pattern (not 16/16 Floyd-Steinberg)"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S20-import",
+      "spec": "Spec 8",
+      "title": "Image import with dithering preview",
+      "priority": 20,
+      "description": "Implement ImportDialog.fs and file import flow. User imports via file picker or drag-and-drop. Image is scaled to fit 512x342, converted to grayscale, dithered via Atkinson. Preview shown with brightness/threshold slider. Confirm replaces canvas (single undo entry). Cancel returns to previous state. Heavy computation must not block UI.",
+      "acceptanceCriteria": [
+        "File picker accepts PNG, JPEG, GIF, WebP",
+        "Drag-and-drop opens import preview",
+        "Image scaled to fit 512x342 without distortion",
+        "Brightness/threshold slider produces visible changes in dithered output",
+        "Confirm replaces canvas and is single undo entry",
+        "Cancel returns to previous canvas with no changes",
+        "Import of 4000x3000 image completes within 2 seconds",
+        "UI remains responsive during dithering"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S21-export",
+      "spec": "Spec 9",
+      "title": "PNG export at multiple scales",
+      "priority": 21,
+      "description": "Implement export flow. Export current canvas as PNG at 1x (512x342), 2x (1024x684), 4x (2048x1368). PNG is strictly black/white only. Triggers browser file download. Ctrl+S = 1x export, Ctrl+Shift+S = 2x export.",
+      "acceptanceCriteria": [
+        "1x export is exactly 512x342 pixels",
+        "2x export is exactly 1024x684 pixels with 2x2 blocks",
+        "Exported PNG contains only #000000 and #FFFFFF pixels",
+        "Export triggers browser file download",
+        "Ctrl+S triggers 1x export",
+        "Export does not mutate canvas or model"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S22-bezel",
+      "spec": "Spec 12",
+      "title": "Classic Mac bezel preview mode (nice-to-have)",
+      "priority": 22,
+      "description": "Implement MacBezel.fs. Toggle a presentation mode displaying the 512x342 canvas inside a CSS/SVG rendering of the Macintosh Classic II front bezel. Canvas at 1:1 in the screen area. Drawing tools disabled in preview mode. Toggle via button or shortcut.",
+      "acceptanceCriteria": [
+        "Toggle shows canvas inside recognizable Mac Classic II bezel",
+        "Canvas pixels at native 512x342 within bezel screen area",
+        "Drawing tools disabled in preview mode",
+        "Toggle or Escape returns to editor"
+      ],
+      "passes": false
+    },
+    {
+      "id": "S23-e2e-tests",
+      "spec": "Quality",
+      "title": "End-to-end Playwright tests for core workflows",
+      "priority": 23,
+      "description": "Implement E2E tests using Playwright + Expecto. Cover: drawing with pencil tool, undo/redo cycle, zoom in/out, import/export flow. Tests run against Vite dev server.",
+      "acceptanceCriteria": [
+        "E2E test: draw with pencil, verify canvas changed",
+        "E2E test: undo/redo restores canvas state",
+        "E2E test: zoom changes canvas display size",
+        "E2E test: export produces downloadable file",
+        "All E2E tests pass in CI-compatible headless mode"
+      ],
+      "passes": false
+    }
+  ]
+}
