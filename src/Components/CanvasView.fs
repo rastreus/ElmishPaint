@@ -17,10 +17,13 @@ let private clamp minimum maximum value =
     elif value > maximum then maximum
     else value
 
-let private toCanvasPoint (canvas: HTMLCanvasElement) (ev: MouseEvent) =
+let private toCanvasPoint (canvas: HTMLCanvasElement) zoom (ev: MouseEvent) =
+    let safeZoom = max 1 zoom
     let rect = canvas.getBoundingClientRect ()
-    let x = int (ev.clientX - rect.left)
-    let y = int (ev.clientY - rect.top)
+    let scaleX = if rect.width > 0.0 then float canvas.width / rect.width else 1.0
+    let scaleY = if rect.height > 0.0 then float canvas.height / rect.height else 1.0
+    let x = int ((ev.clientX - rect.left) * scaleX) / safeZoom
+    let y = int ((ev.clientY - rect.top) * scaleY) / safeZoom
 
     {
         X = clamp 0 (BitCanvas.Width - 1) x
@@ -30,6 +33,9 @@ let private toCanvasPoint (canvas: HTMLCanvasElement) (ev: MouseEvent) =
 [<ReactComponent>]
 let CanvasView (model: Model) (dispatch: Msg -> unit) =
     let canvasRef = React.useRef<HTMLCanvasElement option> (None)
+    let zoom = max 1 model.UI.Zoom
+    let scaledWidth = BitCanvas.Width * zoom
+    let scaledHeight = BitCanvas.Height * zoom
 
     React.useEffect (fun () ->
         match canvasRef.current with
@@ -40,22 +46,22 @@ let CanvasView (model: Model) (dispatch: Msg -> unit) =
             | context ->
                 let canvasContext = context :?> CanvasRenderingContext2D
                 canvasContext.imageSmoothingEnabled <- false
-                canvasContext.putImageData (BitCanvas.toImageData 1 model.Canvas, 0.0, 0.0)
+                canvasContext.putImageData (BitCanvas.toImageData zoom model.Canvas, 0.0, 0.0)
     )
 
     let dispatchMouseEvent makeMsg (ev: MouseEvent) =
         match canvasRef.current with
         | None -> ()
         | Some canvas ->
-            let point = toCanvasPoint canvas ev
+            let point = toCanvasPoint canvas zoom ev
             let modifiers = toModifiers ev
             dispatch (makeMsg (point, modifiers))
 
     Html.canvas [
         prop.testId "paint-canvas"
         prop.ref canvasRef
-        prop.width 512
-        prop.height 342
+        prop.width scaledWidth
+        prop.height scaledHeight
         prop.onMouseDown (dispatchMouseEvent CanvasMouseDown)
         prop.onMouseMove (dispatchMouseEvent CanvasMouseMove)
         prop.onMouseUp (dispatchMouseEvent CanvasMouseUp)
