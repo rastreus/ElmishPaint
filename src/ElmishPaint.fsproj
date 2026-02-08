@@ -5,6 +5,7 @@
     </PropertyGroup>
     <ItemGroup>
         <None Include="index.html" />
+        <Compile Include="Types.fs" />
         <Compile Include="App.fs" />
         <Compile Include="App.test.fs" />
         <Compile Include="Main.fs" />
