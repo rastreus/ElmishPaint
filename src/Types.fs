@@ -1,5 +1,7 @@
 namespace App
 
+open Fable.Core.JS
+
 type Bit =
     | White
     | Black
@@ -31,7 +33,7 @@ type Point = { X: int; Y: int }
 type BitCanvas = {
     Width: int
     Height: int
-    Data: byte array
+    Data: Uint8Array
 }
 
 type BrushSize =
