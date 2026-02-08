@@ -42,7 +42,7 @@ CODEX_FLAGS=(
   exec
   --full-auto
   --model gpt-5.3-codex
-  -c model_reasoning_effort=high
+  -c model_reasoning_effort=xhigh
   -c sandbox_workspace_write.network_access=true
   --add-dir .git
   --add-dir "$PNPM_STORE"
