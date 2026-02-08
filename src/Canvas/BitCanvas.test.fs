@@ -54,6 +54,27 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "setPixel and getPixel address all 175104 pixels correctly",
+            fun () ->
+                let canvas = BitCanvas.create ()
+
+                for y in 0 .. (BitCanvas.Height - 1) do
+                    for x in 0 .. (BitCanvas.Width - 1) do
+                        let bit = if (x + y) % 2 = 0 then Black else White
+                        BitCanvas.setPixel x y bit canvas
+
+                let mutable mismatches = 0
+
+                for y in 0 .. (BitCanvas.Height - 1) do
+                    for x in 0 .. (BitCanvas.Width - 1) do
+                        let expected = if (x + y) % 2 = 0 then Black else White
+                        if BitCanvas.getPixel x y canvas <> expected then
+                            mismatches <- mismatches + 1
+
+                Vitest.expect(mismatches).toBe(0)
+        )
+
+        Vitest.test (
             "setPixel out of bounds is a no-op",
             fun () ->
                 let canvas = BitCanvas.create ()
