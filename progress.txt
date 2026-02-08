@@ -40,3 +40,12 @@ Date: 2026-02-08T03:33:39Z
 - Key decision: kept operations under `namespace App.Canvas` (`BitCanvas` module) to avoid F# name collision with the `App.BitCanvas` type defined in `Types.fs`.
 - Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: none.
+## Iteration 4 — S04-bitcanvas-imagedata — BitCanvas toImageData and fromImageData
+Date: 2026-02-08T05:36:26Z
+- Implemented `BitCanvas.toImageData` in `src/Canvas/BitCanvas.fs` with integer scale support; scale 1 outputs 512x342 and scale 2+ replicates source pixels into NxN blocks.
+- Implemented `BitCanvas.fromImageData` in `src/Canvas/BitCanvas.fs` with luminance thresholding (alpha composited over white) and bounded copy into the fixed 512x342 canvas.
+- Expanded `src/Canvas/BitCanvas.test.fs` to cover scale-1 RGBA output, scale-2 2x2 expansion, threshold behavior, and full round-trip equality for `fromImageData (toImageData 1 canvas)`.
+- Added a jsdom-only `ImageData` polyfill in `src/vitest-setup.ts` so `ImageData` constructor calls are testable in Node/Vitest.
+- Applied formatting updates to `src/Canvas/BitCanvas.fs` and `src/Canvas/BitCanvas.test.fs`.
+- Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.

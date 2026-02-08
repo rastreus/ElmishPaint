@@ -64,7 +64,7 @@
         "Round-trip: fromImageData(toImageData 1 canvas) produces identical BitCanvas",
         "Vitest unit tests verify all acceptance criteria"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S05-elmish-runtime",
