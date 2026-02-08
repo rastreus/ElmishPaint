@@ -75,3 +75,12 @@ Date: 2026-02-08T19:54:53Z
 - Applied Fantomas formatting to touched F# files (`src/App.fs`, `src/App.test.fs`, `src/Main.fs`, `src/Canvas/BitCanvas.fs`, `src/Canvas/BitCanvas.test.fs`).
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Runtime check note: attempted `agent-browser` verification against a live dev server, but Chromium launch is blocked in this sandbox (`mach_port_rendezvous` permission error); strict ImageData constructor checks were added to Vitest runtime shim as fallback coverage for this failure mode.
+## Iteration 8 — S07-canvas-zoom — Canvas zoom levels and coordinate mapping
+Date: 2026-02-08T21:11:04Z
+- Implemented `SetZoom` handling in `src/Update.fs` for supported zoom levels `1|2|4|8`; unsupported values are ignored.
+- Extended `src/Components/CanvasView.fs` to render scaled image data (`BitCanvas.toImageData zoom`), size the canvas to `512*zoom` by `342*zoom`, and map mouse coordinates back to pixel coordinates by dividing by zoom.
+- Added pixel grid overlay rendering in `CanvasView` for zoom >= 4x.
+- Expanded tests in `src/Update.test.fs` and `src/Components/CanvasView.test.fs` to verify zoom transitions, scaled dimensions, zoomed coordinate mapping, and grid visibility thresholds.
+- Updated `src/vitest-setup.ts` 2D canvas shim to record `stroke` calls so grid overlay drawing can be asserted in unit tests.
+- Applied Fantomas formatting for touched files.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.

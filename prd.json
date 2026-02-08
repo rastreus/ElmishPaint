@@ -127,7 +127,7 @@
         "Pixel grid overlay visible at zoom >= 4x, not visible below",
         "SetZoom message changes zoom level and re-renders correctly"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S08-pencil",
