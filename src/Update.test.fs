@@ -44,4 +44,22 @@ Vitest.describe (
 
                 Vitest.expect(result1).toEqual (result2)
         )
+
+        Vitest.test (
+            "SetZoom applies supported zoom levels and ignores unsupported values",
+            fun () ->
+                let model = fst (Runtime.init ())
+
+                let zoomTwoModel, zoomTwoCmd = Runtime.update (SetZoom 2) model
+                Vitest.expect(zoomTwoModel.UI.Zoom).toBe (2)
+                Vitest.expect(zoomTwoCmd).toEqual (Cmd.none)
+
+                let zoomEightModel, zoomEightCmd = Runtime.update (SetZoom 8) zoomTwoModel
+                Vitest.expect(zoomEightModel.UI.Zoom).toBe (8)
+                Vitest.expect(zoomEightCmd).toEqual (Cmd.none)
+
+                let invalidZoomModel, invalidZoomCmd = Runtime.update (SetZoom 3) zoomEightModel
+                Vitest.expect(invalidZoomModel.UI.Zoom).toBe (8)
+                Vitest.expect(invalidZoomCmd).toEqual (Cmd.none)
+        )
 )
