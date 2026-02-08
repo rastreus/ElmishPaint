@@ -118,4 +118,27 @@ Vitest.describe (
                 Vitest.expect(BitCanvas.getPixel 40 40 original).toEqual (White)
                 Vitest.expect(BitCanvas.getPixel 40 40 copy).toEqual (Black)
         )
+
+        Vitest.test (
+            "toImageData at scale 1 uses 512x342 output with black/white RGBA values",
+            fun () ->
+                let canvas = BitCanvas.create ()
+                BitCanvas.setPixel 0 0 Black canvas
+                BitCanvas.setPixel 1 0 White canvas
+
+                let imageData = BitCanvas.toImageData 1 canvas
+
+                Vitest.expect(imageData.width).toBe (float BitCanvas.Width)
+                Vitest.expect(imageData.height).toBe (float BitCanvas.Height)
+
+                Vitest.expect(imageData.data[0]).toBe (0uy)
+                Vitest.expect(imageData.data[1]).toBe (0uy)
+                Vitest.expect(imageData.data[2]).toBe (0uy)
+                Vitest.expect(imageData.data[3]).toBe (255uy)
+
+                Vitest.expect(imageData.data[4]).toBe (255uy)
+                Vitest.expect(imageData.data[5]).toBe (255uy)
+                Vitest.expect(imageData.data[6]).toBe (255uy)
+                Vitest.expect(imageData.data[7]).toBe (255uy)
+        )
 )
