@@ -9,7 +9,7 @@ type Components =
 
     [<ReactComponent(true)>]
     static member App() =
-        let model, dispatch = React.useElmish(Runtime.init, Runtime.update, [| |])
+        let model, dispatch = React.useElmish (Runtime.init, Runtime.update, [||])
 
         Html.main [
             prop.className "min-h-screen bg-stone-100 grid place-items-center"
@@ -19,10 +19,7 @@ type Components =
                     prop.className "text-4xl font-bold tracking-tight text-zinc-900"
                     prop.text "Hello ElmishPaint"
                 ]
-                Html.p [
-                    prop.testId "active-tool"
-                    prop.text $"Active tool: {model.Tool}"
-                ]
+                Html.p [ prop.testId "active-tool"; prop.text $"Active tool: {model.Tool}" ]
                 Html.button [
                     prop.testId "select-line"
                     prop.text "Select Line Tool"

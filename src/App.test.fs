@@ -27,10 +27,7 @@ Vitest.describe (
 
                 Vitest.expect(activeTool).toHaveTextContent ("Active tool: Pencil")
 
-                do!
-                    RTL.act (fun () -> promise {
-                        RTL.fireEvent.click (selectLine)
-                    })
+                do! RTL.act (fun () -> promise { RTL.fireEvent.click (selectLine) })
 
                 Vitest.expect(activeTool).toHaveTextContent ("Active tool: Line")
             }
