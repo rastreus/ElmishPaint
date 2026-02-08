@@ -96,7 +96,7 @@
         "Setting a pixel via update and re-rendering shows the change",
         "dotnet fable src compiles with zero warnings"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S07-canvas-zoom",

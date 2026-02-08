@@ -59,3 +59,15 @@ Date: 2026-02-08T07:02:21Z
 - Gotcha: Fable in this repo rejects runtime `array2d` creation helpers; default pattern tile in S05 uses placeholder until pattern story implementation.
 - Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: added discovered pattern for `array2d` helper incompatibility.
+## Iteration 6 — S06-canvas-render — Canvas rendering at 1x zoom
+Date: 2026-02-08T15:54:39Z
+- Added `src/Components/CanvasView.fs` Feliz v3 component with `React.useRef` canvas ref and `React.useEffect` render lifecycle; draws `BitCanvas.toImageData 1` into a 512x342 `<canvas>`.
+- Implemented canvas mouse dispatch in `CanvasView` for down/move/up, mapping browser mouse coordinates to clamped pixel coordinates and forwarding modifier keys in `CanvasMouseDown/Move/Up`.
+- Wired `CanvasView` into `src/App.fs` so runtime model updates render on the canvas.
+- Updated `src/Update.fs` canvas mouse handling: pencil now paints black pixels on mouse-down and while dragging, enabling update-driven rerendered pixel changes.
+- Added `src/Components/CanvasView.test.fs` to verify: 512x342 canvas sizing, pixel rendering to 2D context, and correct mouse message coordinate dispatch.
+- Extended `src/App.test.fs` with integration test proving a canvas mousedown updates model via `update` and rerenders image data with changed pixel value.
+- Added jsdom canvas 2D context shim in `src/vitest-setup.ts` to capture `putImageData` calls deterministically for rendering assertions.
+- Updated `src/ElmishPaint.fsproj` compile order for `Components/CanvasView.fs` and `Components/CanvasView.test.fs`; formatted modified F# files with Fantomas.
+- Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.
