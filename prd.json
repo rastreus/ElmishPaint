@@ -112,7 +112,7 @@
           "App renders in browser without ImageData TypeError",
           "vite-plugin-fable removed from vite.config.js and package.json"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S07-canvas-zoom",
