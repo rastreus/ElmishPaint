@@ -289,7 +289,7 @@ dotnet run --project e2e/E2E.fsproj
 jj desc -m "type(scope): description"   # describe FIRST
 # ... make changes ...
 dotnet build                             # compile
-pnpm                                     # test
+pnpm test                                # test
 jj new                                   # ON GREEN: finalize
 jj restore                               # ON RED: discard
 
