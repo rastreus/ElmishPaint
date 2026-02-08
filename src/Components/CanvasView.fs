@@ -20,8 +20,19 @@ let private clamp minimum maximum value =
 let private toCanvasPoint (canvas: HTMLCanvasElement) zoom (ev: MouseEvent) =
     let safeZoom = max 1 zoom
     let rect = canvas.getBoundingClientRect ()
-    let scaleX = if rect.width > 0.0 then float canvas.width / rect.width else 1.0
-    let scaleY = if rect.height > 0.0 then float canvas.height / rect.height else 1.0
+
+    let scaleX =
+        if rect.width > 0.0 then
+            float canvas.width / rect.width
+        else
+            1.0
+
+    let scaleY =
+        if rect.height > 0.0 then
+            float canvas.height / rect.height
+        else
+            1.0
+
     let x = int ((ev.clientX - rect.left) * scaleX) / safeZoom
     let y = int ((ev.clientY - rect.top) * scaleY) / safeZoom
 
@@ -34,12 +45,12 @@ let private drawPixelGrid (canvasContext: CanvasRenderingContext2D) scaledWidth 
     if zoom >= 4 then
         canvasContext.beginPath ()
 
-        for x in zoom .. zoom .. (scaledWidth - 1) do
+        for x in zoom..zoom .. (scaledWidth - 1) do
             let xPos = float x + 0.5
             canvasContext.moveTo (xPos, 0.0)
             canvasContext.lineTo (xPos, float scaledHeight)
 
-        for y in zoom .. zoom .. (scaledHeight - 1) do
+        for y in zoom..zoom .. (scaledHeight - 1) do
             let yPos = float y + 0.5
             canvasContext.moveTo (0.0, yPos)
             canvasContext.lineTo (float scaledWidth, yPos)

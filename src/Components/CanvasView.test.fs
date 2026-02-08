@@ -10,7 +10,11 @@ let private defaultModel () = fst (Runtime.init ())
 
 let private modelWithZoom zoom =
     let model = defaultModel ()
-    { model with UI = { model.UI with Zoom = zoom } }
+
+    {
+        model with
+            UI = { model.UI with Zoom = zoom }
+    }
 
 let private getStrokeCalls (canvas: HTMLCanvasElement) =
     if isNullOrUndefined canvas?__strokeCalls then
@@ -120,8 +124,7 @@ Vitest.describe (
             fun () ->
                 let mutable dispatchedMessage: Msg option = None
 
-                let dispatch message =
-                    dispatchedMessage <- Some message
+                let dispatch message = dispatchedMessage <- Some message
 
                 let view = RTL.render (CanvasView (modelWithZoom 4) dispatch)
                 let canvas = view.getByTestId ("paint-canvas")
@@ -129,7 +132,7 @@ Vitest.describe (
                 RTL.fireEvent.custom ("mouseDown", canvas, createObj [ "clientX" ==> 40; "clientY" ==> 84 ])
 
                 match dispatchedMessage with
-                | Some (CanvasMouseDown(point, _)) -> Vitest.expect(point).toEqual ({ X = 10; Y = 21 })
+                | Some(CanvasMouseDown(point, _)) -> Vitest.expect(point).toEqual ({ X = 10; Y = 21 })
                 | _ -> failwith "expected a zoom-mapped CanvasMouseDown message"
         )
 

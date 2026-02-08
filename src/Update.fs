@@ -125,7 +125,11 @@ module Runtime =
         | ExportPNG _ -> model, Cmd.none
         | SetZoom zoom ->
             if isSupportedZoom zoom then
-                { model with UI = { model.UI with Zoom = zoom } }, Cmd.none
+                {
+                    model with
+                        UI = { model.UI with Zoom = zoom }
+                },
+                Cmd.none
             else
                 model, Cmd.none
         | ScrollCanvas _ -> model, Cmd.none
