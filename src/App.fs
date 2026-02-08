@@ -3,6 +3,7 @@ namespace App
 open Fable.Core
 open Feliz
 open Feliz.UseElmish
+open App.Components.CanvasView
 
 [<Erase; Mangle(false)>]
 type Components =
@@ -19,6 +20,7 @@ type Components =
                     prop.className "text-4xl font-bold tracking-tight text-zinc-900"
                     prop.text "Hello ElmishPaint"
                 ]
+                CanvasView model dispatch
                 Html.p [ prop.testId "active-tool"; prop.text $"Active tool: {model.Tool}" ]
                 Html.button [
                     prop.testId "select-line"
