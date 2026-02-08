@@ -233,7 +233,7 @@ src/
     Canvas2D.fs     — Fable bindings for Canvas API
     FileApi.fs      — File/Blob/download bindings
     ShadcnUi.fs     — shadcn/ui bindings
-  App.fs            — Root component, React.useElmish wiring
+  App.fs            — Root component, Feliz.UseElmish wiring
   Main.fs           — Entry point, mount React root
 ```
 
@@ -262,17 +262,14 @@ Run ALL before marking a story complete. **Do not commit if any fails.**
 # F# compilation via Fable (zero warnings)
 dotnet fable src
 
-# Expecto unit tests (must pass)
-dotnet run --project tests/Tests.fsproj
-
 # Vitest JS-level tests (if applicable)
-npx vitest run
+pnpm test
 
 # Vite production build (must succeed)
-npx vite build
+pnpm build
 
 # F# formatting check
-dotnet fantomas --check src/ tests/
+dotnet fantomas --check src/
 ```
 
 E2E tests (run periodically, not every commit):
@@ -292,7 +289,7 @@ dotnet run --project e2e/E2E.fsproj
 jj desc -m "type(scope): description"   # describe FIRST
 # ... make changes ...
 dotnet build                             # compile
-dotnet test --filter "Relevant"          # test
+pnpm                                     # test
 jj new                                   # ON GREEN: finalize
 jj restore                               # ON RED: discard
 
@@ -357,6 +354,10 @@ git-cliff --output CHANGELOG.md
   For this repo (`-e fs.jsx`), use `dotnet fable clean src -e fs.jsx --yes`
   or stale `*.fs.jsx` test artifacts may remain and produce false-positive test
   runs.
+- Sandbox configuration: `ralph-codex.sh` grants `--add-dir .git` so `jj desc`,
+  `jj new`, `jj restore` all work inside the Codex sandbox. If jj operations
+  fail with "Operation not permitted", check that `.git` is in the add-dir list.
+  pnpm/corepack caches are also granted via `--add-dir`.
 
 ---
 

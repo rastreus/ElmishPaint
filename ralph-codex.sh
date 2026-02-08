@@ -29,14 +29,24 @@ AGENTS_FILE="AGENTS.md"
 # ── Codex configuration ─────────────────────────────────────────────
 # --full-auto: workspace-write sandbox + on-request approvals (no prompts)
 # Network access enabled for pnpm install, dotnet restore, etc.
+# --add-dir .git: allow jj to write commits (jj desc, jj new, jj restore)
+# --add-dir cache paths: allow pnpm/corepack to use their caches
 # -o: capture final agent message to a file for completion-signal parsing
 CODEX_OUTPUT_FILE=".ralph-codex-output.txt"
+
+# Resolve pnpm/corepack cache dirs (macOS defaults as fallback)
+PNPM_STORE="${PNPM_HOME:-$HOME/Library/pnpm}"
+COREPACK_CACHE="${COREPACK_HOME:-$HOME/Library/Caches/node/corepack}"
+
 CODEX_FLAGS=(
   exec
   --full-auto
   --model gpt-5.3-codex
   -c model_reasoning_effort=high
   -c sandbox_workspace_write.network_access=true
+  --add-dir .git
+  --add-dir "$PNPM_STORE"
+  --add-dir "$COREPACK_CACHE"
   --json
   -o "$CODEX_OUTPUT_FILE"
 )

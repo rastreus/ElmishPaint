@@ -14,3 +14,11 @@ Date: 2026-02-07T23:43:25Z
 - Verification run results: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, and `dotnet fantomas --check src/` all pass.
 - Gotchas: sandbox blocks jj commit mutations (`jj desc`/`jj new`) due `.git/objects` write restrictions; pnpm/corepack needs writable cache env + Node 24 selection in this environment.
 - AGENTS.md updates made: added a Discovered Patterns note that clean must use `-e fs.jsx` to avoid stale transpiled test artifacts.
+## Environment Fix — Post-Iteration 1
+Date: 2026-02-08
+- Fixed Codex sandbox: added `--add-dir .git` to ralph-codex.sh so jj can commit.
+- Added `--add-dir` for pnpm/corepack cache directories.
+- Added `.pnpm-store/` and `dist/` to .gitignore (was causing 10k pending changes in VS Code).
+- Fixed SKILL.md for feliz-v3: added YAML frontmatter required by Codex skill loader.
+- Dropped model_reasoning_effort from xhigh to high for faster iterations.
+- Added --json flag for better visibility into agent progress.
