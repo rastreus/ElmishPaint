@@ -8,6 +8,7 @@
         <Compile Include="Types.fs" />
         <Compile Include="Model.fs" />
         <Compile Include="Msg.fs" />
+        <Compile Include="Canvas/BitCanvas.fs" />
         <Compile Include="App.fs" />
         <Compile Include="App.test.fs" />
         <Compile Include="Main.fs" />
