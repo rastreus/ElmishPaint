@@ -30,6 +30,22 @@ let private toCanvasPoint (canvas: HTMLCanvasElement) zoom (ev: MouseEvent) =
         Y = clamp 0 (BitCanvas.Height - 1) y
     }
 
+let private drawPixelGrid (canvasContext: CanvasRenderingContext2D) scaledWidth scaledHeight zoom =
+    if zoom >= 4 then
+        canvasContext.beginPath ()
+
+        for x in zoom .. zoom .. (scaledWidth - 1) do
+            let xPos = float x + 0.5
+            canvasContext.moveTo (xPos, 0.0)
+            canvasContext.lineTo (xPos, float scaledHeight)
+
+        for y in zoom .. zoom .. (scaledHeight - 1) do
+            let yPos = float y + 0.5
+            canvasContext.moveTo (0.0, yPos)
+            canvasContext.lineTo (float scaledWidth, yPos)
+
+        canvasContext.stroke ()
+
 [<ReactComponent>]
 let CanvasView (model: Model) (dispatch: Msg -> unit) =
     let canvasRef = React.useRef<HTMLCanvasElement option> (None)
@@ -47,6 +63,7 @@ let CanvasView (model: Model) (dispatch: Msg -> unit) =
                 let canvasContext = context :?> CanvasRenderingContext2D
                 canvasContext.imageSmoothingEnabled <- false
                 canvasContext.putImageData (BitCanvas.toImageData zoom model.Canvas, 0.0, 0.0)
+                drawPixelGrid canvasContext scaledWidth scaledHeight zoom
     )
 
     let dispatchMouseEvent makeMsg (ev: MouseEvent) =
