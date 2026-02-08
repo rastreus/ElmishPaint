@@ -8,6 +8,10 @@ open Vitest
 
 let private defaultModel () = fst (Runtime.init ())
 
+let private modelWithZoom zoom =
+    let model = defaultModel ()
+    { model with UI = { model.UI with Zoom = zoom } }
+
 Vitest.describe (
     "CanvasView",
     fun () ->
@@ -19,6 +23,16 @@ Vitest.describe (
 
                 Vitest.expect(canvas).toHaveAttribute ("width", "512")
                 Vitest.expect(canvas).toHaveAttribute ("height", "342")
+        )
+
+        Vitest.test (
+            "renders canvas dimensions scaled by zoom",
+            fun () ->
+                let view = RTL.render (CanvasView (modelWithZoom 8) ignore)
+                let canvas = view.getByTestId ("paint-canvas")
+
+                Vitest.expect(canvas).toHaveAttribute ("width", "4096")
+                Vitest.expect(canvas).toHaveAttribute ("height", "2736")
         )
 
         Vitest.test (
@@ -93,5 +107,23 @@ Vitest.describe (
                     Vitest.expect(moveMods.Ctrl).toBeTruthy ()
                     Vitest.expect(upMods.Alt).toBeTruthy ()
                 | _ -> failwith "expected down, move, and up canvas messages"
+        )
+
+        Vitest.test (
+            "maps mouse coordinates to pixel coordinates using zoom",
+            fun () ->
+                let mutable dispatchedMessage: Msg option = None
+
+                let dispatch message =
+                    dispatchedMessage <- Some message
+
+                let view = RTL.render (CanvasView (modelWithZoom 4) dispatch)
+                let canvas = view.getByTestId ("paint-canvas")
+
+                RTL.fireEvent.custom ("mouseDown", canvas, createObj [ "clientX" ==> 40; "clientY" ==> 84 ])
+
+                match dispatchedMessage with
+                | Some (CanvasMouseDown(point, _)) -> Vitest.expect(point).toEqual ({ X = 10; Y = 21 })
+                | _ -> failwith "expected a zoom-mapped CanvasMouseDown message"
         )
 )
