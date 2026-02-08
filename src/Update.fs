@@ -54,6 +54,9 @@ module Runtime =
         BitCanvas.setPixel point.X point.Y Black nextCanvas
         nextCanvas
 
+    let private isSupportedZoom zoom =
+        zoom = 1 || zoom = 2 || zoom = 4 || zoom = 8
+
     let update msg model : Model * Cmd<Msg> =
         match msg with
         | SelectTool tool -> { model with Tool = tool }, Cmd.none
@@ -120,6 +123,10 @@ module Runtime =
         | ConfirmImport -> model, Cmd.none
         | CancelImport -> model, Cmd.none
         | ExportPNG _ -> model, Cmd.none
-        | SetZoom _ -> model, Cmd.none
+        | SetZoom zoom ->
+            if isSupportedZoom zoom then
+                { model with UI = { model.UI with Zoom = zoom } }, Cmd.none
+            else
+                model, Cmd.none
         | ScrollCanvas _ -> model, Cmd.none
         | KeyDown _ -> model, Cmd.none
