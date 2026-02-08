@@ -3,6 +3,11 @@
 # Spawns a fresh Codex agent per iteration. Each iteration picks one
 # prd.json story, implements it using TCR, and marks it complete.
 #
+# After each iteration, runs post-iteration verification outside the
+# sandbox (dotnet build + optional agent-browser runtime check). If
+# verification fails, the story's passes flag is reverted so the next
+# iteration picks it up automatically.
+#
 # Usage:
 #   ./ralph-codex.sh [max_iterations]    # default: 10
 #   ./ralph-codex.sh 30                  # run up to 30 iterations
@@ -13,6 +18,7 @@
 #   - jj (jujutsu VCS)
 #   - dotnet SDK with Fable tooling
 #   - Node.js with pnpm
+#   - agent-browser (optional, for runtime verification)
 #
 # Authentication:
 #   codex login          # ChatGPT account (browser OAuth)
@@ -48,6 +54,7 @@ CODEX_FLAGS=(
   --add-dir "$PNPM_STORE"
   --add-dir "$COREPACK_CACHE"
   --add-dir "$HOME/.pyenv"
+  --add-dir "$HOME/Library/Caches/ms-playwright"
   --json
   -o "$CODEX_OUTPUT_FILE"
 )
@@ -102,11 +109,112 @@ remaining() {
   jq '[.userStories[] | select(.passes == false)] | length' "$PRD_FILE"
 }
 
+# ── Revert a story's passes flag to false ────────────────────────────
+revert_story() {
+  local story_id="$1"
+  local tmp
+  tmp=$(mktemp)
+  jq --arg id "$story_id" '
+    (.userStories[] | select(.id == $id)).passes = false
+  ' "$PRD_FILE" > "$tmp" && mv "$tmp" "$PRD_FILE"
+  echo "  [revert] Set $story_id passes=false in prd.json"
+}
+
+# ── Post-iteration verification (runs OUTSIDE sandbox) ───────────────
+# Catches issues the agent's in-sandbox checks may have missed:
+#   1. dotnet build (F# type checking that Fable transpilation can skip)
+#   2. agent-browser runtime errors (real browser API mismatches)
+#
+# If verification fails, the story's passes flag is reverted so the
+# next iteration automatically picks it up as a fix task.
+
+verify_build() {
+  local story_id="$1"
+  echo "  [verify] dotnet build..."
+  if ! dotnet build --nologo -v quiet 2>&1; then
+    echo "  [FAIL] dotnet build failed for $story_id"
+    revert_story "$story_id"
+    return 1
+  fi
+  echo "  [OK] dotnet build clean."
+  return 0
+}
+
+verify_runtime() {
+  local story_id="$1"
+
+  # Skip stories that don't touch rendering or browser APIs
+  case "$story_id" in
+    S01-*|S02-*|S03-*) return 0 ;;
+  esac
+
+  # Skip if agent-browser is not installed
+  if ! command -v agent-browser &>/dev/null; then
+    echo "  [skip] agent-browser not installed, skipping runtime check."
+    return 0
+  fi
+
+  echo "  [verify] Runtime browser check for $story_id..."
+
+  # Start dev server in background
+  pnpm start &>/dev/null &
+  local dev_pid=$!
+
+  # Wait for vite to be ready (poll for up to 15 seconds)
+  local retries=0
+  while ! curl -s -o /dev/null http://localhost:5173 2>/dev/null; do
+    sleep 1
+    retries=$((retries + 1))
+    if [[ $retries -ge 15 ]]; then
+      echo "  [FAIL] Dev server did not start within 15 seconds."
+      kill "$dev_pid" 2>/dev/null || true
+      wait "$dev_pid" 2>/dev/null || true
+      revert_story "$story_id"
+      return 1
+    fi
+  done
+
+  # Open the app and check for runtime errors
+  agent-browser open http://localhost:5173 2>/dev/null || true
+  sleep 2  # let React render and any errors fire
+
+  local errors
+  errors=$(agent-browser errors 2>/dev/null || echo "")
+
+  # Capture console errors too (non-blocking)
+  local console_errors
+  console_errors=$(agent-browser console 2>/dev/null | grep -i "error" || echo "")
+
+  # Cleanup
+  agent-browser close 2>/dev/null || true
+  kill "$dev_pid" 2>/dev/null || true
+  wait "$dev_pid" 2>/dev/null || true
+
+  if [[ -n "$errors" ]]; then
+    echo "  [FAIL] Uncaught runtime errors:"
+    echo "$errors"
+    if [[ -n "$console_errors" ]]; then
+      echo "  Console errors:"
+      echo "$console_errors"
+    fi
+    revert_story "$story_id"
+    return 1
+  fi
+
+  if [[ -n "$console_errors" ]]; then
+    echo "  [warn] Console errors (non-blocking):"
+    echo "$console_errors"
+  fi
+
+  echo "  [OK] No runtime errors."
+  return 0
+}
+
 # ── Main loop ────────────────────────────────────────────────────────
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  Ralph Loop — ElmishPaint (Codex)                            ║"
-echo "║  Max iterations: $MAX_ITERATIONS                                          ║"
-echo "║  Remaining stories: $(remaining)                                       ║"
+echo "║  Ralph Loop — ElmishPaint (Codex)                          ║"
+echo "║  Max iterations: $MAX_ITERATIONS                           ║"
+echo "║  Remaining stories: $(remaining)                           ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -164,7 +272,8 @@ Implement story **${NEXT_STORY}**: "${NEXT_TITLE}"
 5. Explore the codebase to understand current state.
 6. Implement the story following TCR discipline (small steps, test, commit or revert).
 7. Run ALL feedback loops before marking complete:
-   - dotnet fable src -e fs.jsx --verbose (must compile, zero warnings)
+   - dotnet build (must succeed with zero errors)
+   - dotnet fable src -e fs.jsx (must compile, zero warnings)
    - pnpm test (Vitest tests must pass)
    - pnpm build (production build must succeed)
    - dotnet fantomas --check src/ (formatting must pass)
@@ -189,14 +298,38 @@ EOF
   rm -f "$CODEX_OUTPUT_FILE"
 
   # Run the agent
+  echo "  [codex] Starting agent..."
   codex "${CODEX_FLAGS[@]}" "$ITERATION_PROMPT" 2>&1 || true
 
-  # Check for completion signal in captured output
+  # ── Post-iteration verification (outside sandbox) ──────────────────
+  echo ""
+  echo "  [post] Running post-iteration verification..."
+
+  VERIFY_FAILED=false
+
+  verify_build "$NEXT_STORY" || VERIFY_FAILED=true
+
+  if [[ "$VERIFY_FAILED" == "false" ]]; then
+    verify_runtime "$NEXT_STORY" || VERIFY_FAILED=true
+  fi
+
+  if [[ "$VERIFY_FAILED" == "true" ]]; then
+    echo ""
+    echo "  [post] Verification FAILED for $NEXT_STORY."
+    echo "         Story reverted to passes=false."
+    echo "         Next iteration will address it."
+    echo ""
+  else
+    echo "  [post] Verification passed for $NEXT_STORY."
+  fi
+
+  # ── Check for completion signal in captured output ─────────────────
   if [[ -f "$CODEX_OUTPUT_FILE" ]]; then
     RESULT=$(cat "$CODEX_OUTPUT_FILE")
     echo "$RESULT"
 
-    if [[ "$RESULT" == *"<promise>COMPLETE</promise>"* ]]; then
+    # Only honor completion signal if verification also passed
+    if [[ "$RESULT" == *"<promise>COMPLETE</promise>"* && "$VERIFY_FAILED" == "false" ]]; then
       echo ""
       echo "════════════════════════════════════════════════"
       echo "  All stories complete. PRD fulfilled."
