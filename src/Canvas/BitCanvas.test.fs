@@ -13,9 +13,9 @@ Vitest.describe (
                 let canvas = BitCanvas.create ()
                 let expectedByteCount = ((BitCanvas.Width * BitCanvas.Height) + 7) / 8
 
-                Vitest.expect(canvas.Width).toBe(BitCanvas.Width)
-                Vitest.expect(canvas.Height).toBe(BitCanvas.Height)
-                Vitest.expect(canvas.Data.length).toBe(expectedByteCount)
+                Vitest.expect(canvas.Width).toBe (BitCanvas.Width)
+                Vitest.expect(canvas.Height).toBe (BitCanvas.Height)
+                Vitest.expect(canvas.Data.length).toBe (expectedByteCount)
 
                 let mutable blackPixels = 0
 
@@ -24,7 +24,7 @@ Vitest.describe (
                         if BitCanvas.getPixel x y canvas = Black then
                             blackPixels <- blackPixels + 1
 
-                Vitest.expect(blackPixels).toBe(0)
+                Vitest.expect(blackPixels).toBe (0)
         )
 
         Vitest.test (
@@ -32,10 +32,10 @@ Vitest.describe (
             fun () ->
                 let canvas = BitCanvas.create ()
 
-                Vitest.expect(BitCanvas.getPixel -1 0 canvas).toEqual(White)
-                Vitest.expect(BitCanvas.getPixel 0 -1 canvas).toEqual(White)
-                Vitest.expect(BitCanvas.getPixel BitCanvas.Width 0 canvas).toEqual(White)
-                Vitest.expect(BitCanvas.getPixel 0 BitCanvas.Height canvas).toEqual(White)
+                Vitest.expect(BitCanvas.getPixel -1 0 canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 0 -1 canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel BitCanvas.Width 0 canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 0 BitCanvas.Height canvas).toEqual (White)
         )
 
         Vitest.test (
@@ -48,9 +48,9 @@ Vitest.describe (
                 BitCanvas.setPixel 257 129 Black canvas
                 BitCanvas.setPixel 257 129 White canvas
 
-                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual(Black)
-                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual(Black)
-                Vitest.expect(BitCanvas.getPixel 257 129 canvas).toEqual(White)
+                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 257 129 canvas).toEqual (White)
         )
 
         Vitest.test (
@@ -68,10 +68,11 @@ Vitest.describe (
                 for y in 0 .. (BitCanvas.Height - 1) do
                     for x in 0 .. (BitCanvas.Width - 1) do
                         let expected = if (x + y) % 2 = 0 then Black else White
+
                         if BitCanvas.getPixel x y canvas <> expected then
                             mismatches <- mismatches + 1
 
-                Vitest.expect(mismatches).toBe(0)
+                Vitest.expect(mismatches).toBe (0)
         )
 
         Vitest.test (
@@ -85,7 +86,7 @@ Vitest.describe (
                 BitCanvas.setPixel BitCanvas.Width 10 White canvas
                 BitCanvas.setPixel 10 BitCanvas.Height White canvas
 
-                Vitest.expect(BitCanvas.getPixel 10 10 canvas).toEqual(Black)
+                Vitest.expect(BitCanvas.getPixel 10 10 canvas).toEqual (Black)
         )
 
         Vitest.test (
@@ -94,12 +95,12 @@ Vitest.describe (
                 let canvas = BitCanvas.create ()
 
                 BitCanvas.fill Black canvas
-                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual(Black)
-                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual(Black)
+                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual (Black)
 
                 BitCanvas.clear canvas
-                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual(White)
-                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual(White)
+                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual (White)
         )
 
         Vitest.test (
@@ -112,9 +113,9 @@ Vitest.describe (
                 BitCanvas.setPixel 20 20 White copy
                 BitCanvas.setPixel 40 40 Black copy
 
-                Vitest.expect(BitCanvas.getPixel 20 20 original).toEqual(Black)
-                Vitest.expect(BitCanvas.getPixel 20 20 copy).toEqual(White)
-                Vitest.expect(BitCanvas.getPixel 40 40 original).toEqual(White)
-                Vitest.expect(BitCanvas.getPixel 40 40 copy).toEqual(Black)
+                Vitest.expect(BitCanvas.getPixel 20 20 original).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 20 20 copy).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 40 40 original).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 40 40 copy).toEqual (Black)
         )
 )
