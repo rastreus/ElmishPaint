@@ -3,6 +3,7 @@ namespace App.Canvas
 open App
 open Browser
 open Fable.Core.JS
+open Fable.Core.JsInterop
 
 [<RequireQualifiedAccess>]
 module BitCanvas =
@@ -23,6 +24,9 @@ module BitCanvas =
         let byteIndex = pixelIndex >>> 3
         let bitMask = byte (1 <<< (pixelIndex &&& 7))
         byteIndex, bitMask
+
+    let private createImageData (data: Uint8ClampedArray) (width: int) (height: int) : Types.ImageData =
+        emitJsExpr (data, width, height) "new ImageData($0, $1, $2)"
 
     let create () : App.BitCanvas = {
         Width = Width
@@ -62,8 +66,7 @@ module BitCanvas =
         let outputWidth = canvas.Width * scale
         let outputHeight = canvas.Height * scale
 
-        let outputData: byte array =
-            Microsoft.FSharp.Collections.Array.zeroCreate (outputWidth * outputHeight * 4)
+        let outputData = Constructors.Uint8ClampedArray.Create(outputWidth * outputHeight * 4)
 
         for y in 0 .. (canvas.Height - 1) do
             for x in 0 .. (canvas.Width - 1) do
@@ -79,7 +82,7 @@ module BitCanvas =
                         outputData[baseIndex + 2] <- channel
                         outputData[baseIndex + 3] <- 255uy
 
-        Dom.ImageData.Create(outputData, float outputWidth, float outputHeight)
+        createImageData outputData outputWidth outputHeight
 
     let fromImageData (imageData: Types.ImageData) =
         let canvas = create ()
