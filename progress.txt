@@ -31,3 +31,12 @@ Date: 2026-02-08T01:40:40Z
 - Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Decision: kept `BitCanvas.Data` as `byte array` for S02 type stability; concrete backing implementation can be specialized in S03.
 - AGENTS.md updates made: none.
+## Iteration 3 — S03-bitcanvas — BitCanvas data structure and core operations
+Date: 2026-02-08T03:33:39Z
+- Implemented packed 1-bit canvas operations in `src/Canvas/BitCanvas.fs`: `create`, `getPixel`, `setPixel`, `fill`, `clear`, `clone` with 512x342 dimensions and out-of-bounds safety.
+- Switched `BitCanvas.Data` in `src/Types.fs` from `byte array` to `Uint8Array` to match story requirement.
+- Added/expanded Vitest coverage in `src/Canvas/BitCanvas.test.fs`: create defaults, OOB get returns white, set OOB no-op, fill/clear behavior, deep clone behavior, and full 175,104-pixel addressing verification.
+- Updated compile order in `src/ElmishPaint.fsproj` to include `Canvas/BitCanvas.fs` and `Canvas/BitCanvas.test.fs`.
+- Key decision: kept operations under `namespace App.Canvas` (`BitCanvas` module) to avoid F# name collision with the `App.BitCanvas` type defined in `Types.fs`.
+- Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.
