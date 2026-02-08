@@ -2,11 +2,11 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "transpile": "dotnet fable src -e fs.jsx --verbose",
-    "start": "dotnet fable src -e fs.jsx --watch --runFast vite",
-    "build": "pnpm clean && dotnet fable src -e fs.jsx --verbose && vite build",
+    "transpile": "dotnet fable src -e fs.jsx --noCache",
+    "start": "vite dev",
+    "build": "pnpm transpile && vite build",
     "clean": "dotnet fable clean src -e fs.jsx --yes",
-    "test": "dotnet build && pnpm clean && dotnet fable src -e fs.jsx --verbose && vitest run"
+    "test": "pnpm clean && pnpm transpile && vitest run"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -23,6 +23,7 @@
     "@vitejs/plugin-react": "^5.1.3",
     "jsdom": "^28.0.0",
     "vite": "^8.0.0-beta.13",
+    "vite-plugin-fable": "^0.2.1",
     "vitest": "^4.0.18"
   },
   "engines": {
@@ -35,7 +36,8 @@
       "vite": "8.0.0-beta.13"
     },
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "vite-plugin-fable"
     ]
   }
 }

@@ -378,6 +378,10 @@ git-cliff --output CHANGELOG.md
   runtime checks, and should use the strict `ImageData` shim in
   `vitest-setup.ts` to catch browser API mismatches during unit tests.
 - Avoid `module A.B.C` declarations when `namespace A.B` is also used elsewhere in the assembly; use explicit `namespace` + nested `module` instead.
+- `vite-plugin-fable` is required for the dev server (`pnpm start` / `vite dev`).
+  It ensures fable_modules are compiled before Vite serves pages. Do not remove
+  it. The agent's feedback loops (`pnpm test`, `pnpm build`) pre-transpile with
+  `dotnet fable` explicitly and do not depend on the plugin.
 
 ---
 

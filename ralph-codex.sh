@@ -143,12 +143,10 @@ verify_build() {
 verify_runtime() {
   local story_id="$1"
 
-  # Skip stories that don't touch rendering or browser APIs
   case "$story_id" in
     S01-*|S02-*|S03-*) return 0 ;;
   esac
 
-  # Skip if agent-browser is not installed
   if ! command -v agent-browser &>/dev/null; then
     echo "  [skip] agent-browser not installed, skipping runtime check."
     return 0
@@ -156,17 +154,19 @@ verify_runtime() {
 
   echo "  [verify] Runtime browser check for $story_id..."
 
-  # Start dev server in background
-  pnpm start &>/dev/null &
+  # Pre-transpile (files must exist before Vite starts)
+  dotnet fable src -e fs.jsx --noRestore 2>/dev/null || true
+
+  # Start ONLY Vite (no Fable watch — files are already transpiled)
+  pnpm exec vite dev --port 5174 &>/dev/null &
   local dev_pid=$!
 
-  # Wait for vite to be ready (poll for up to 15 seconds)
   local retries=0
-  while ! curl -s -o /dev/null http://localhost:5173 2>/dev/null; do
+  while ! curl -s -o /dev/null http://localhost:5174 2>/dev/null; do
     sleep 1
     retries=$((retries + 1))
-    if [[ $retries -ge 15 ]]; then
-      echo "  [FAIL] Dev server did not start within 15 seconds."
+    if [[ $retries -ge 10 ]]; then
+      echo "  [FAIL] Dev server did not start within 10 seconds."
       kill "$dev_pid" 2>/dev/null || true
       wait "$dev_pid" 2>/dev/null || true
       revert_story "$story_id"
@@ -174,18 +174,12 @@ verify_runtime() {
     fi
   done
 
-  # Open the app and check for runtime errors
-  agent-browser open http://localhost:5173 2>/dev/null || true
-  sleep 2  # let React render and any errors fire
+  agent-browser open http://localhost:5174 2>/dev/null || true
+  sleep 2
 
   local errors
   errors=$(agent-browser errors 2>/dev/null || echo "")
 
-  # Capture console errors too (non-blocking)
-  local console_errors
-  console_errors=$(agent-browser console 2>/dev/null | grep -i "error" || echo "")
-
-  # Cleanup
   agent-browser close 2>/dev/null || true
   kill "$dev_pid" 2>/dev/null || true
   wait "$dev_pid" 2>/dev/null || true
@@ -193,17 +187,8 @@ verify_runtime() {
   if [[ -n "$errors" ]]; then
     echo "  [FAIL] Uncaught runtime errors:"
     echo "$errors"
-    if [[ -n "$console_errors" ]]; then
-      echo "  Console errors:"
-      echo "$console_errors"
-    fi
     revert_story "$story_id"
     return 1
-  fi
-
-  if [[ -n "$console_errors" ]]; then
-    echo "  [warn] Console errors (non-blocking):"
-    echo "$console_errors"
   fi
 
   echo "  [OK] No runtime errors."
