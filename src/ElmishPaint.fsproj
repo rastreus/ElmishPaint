@@ -10,6 +10,7 @@
         <Compile Include="Msg.fs" />
         <Compile Include="Canvas/BitCanvas.fs" />
         <Compile Include="Update.fs" />
+        <Compile Include="Components/CanvasView.fs" />
         <Compile Include="App.fs" />
         <Compile Include="App.test.fs" />
         <Compile Include="Update.test.fs" />
