@@ -81,6 +81,28 @@ module BitCanvas =
 
         Dom.ImageData.Create(outputData, float outputWidth, float outputHeight)
 
+    let fromImageData (imageData: Types.ImageData) =
+        let canvas = create ()
+        let sourceWidth = int imageData.width
+        let sourceHeight = int imageData.height
+        let copyWidth = min canvas.Width sourceWidth
+        let copyHeight = min canvas.Height sourceHeight
+        let pixels = imageData.data
+
+        for y in 0 .. (copyHeight - 1) do
+            for x in 0 .. (copyWidth - 1) do
+                let baseIndex = ((y * sourceWidth) + x) * 4
+                let red = int pixels[baseIndex]
+                let green = int pixels[baseIndex + 1]
+                let blue = int pixels[baseIndex + 2]
+                let alpha = int pixels[baseIndex + 3]
+                let luminance = ((red * 299) + (green * 587) + (blue * 114) + 500) / 1000
+                let overWhite = ((luminance * alpha) + (255 * (255 - alpha))) / 255
+                let bit = if overWhite < 128 then Black else White
+                setPixel x y bit canvas
+
+        canvas
+
     let clear canvas = fill White canvas
 
     let clone (canvas: App.BitCanvas) : App.BitCanvas = {
