@@ -49,13 +49,57 @@ module Runtime =
         },
         Cmd.none
 
+    let private drawPixelAt point canvas =
+        let nextCanvas = BitCanvas.clone canvas
+        BitCanvas.setPixel point.X point.Y Black nextCanvas
+        nextCanvas
+
     let update msg model : Model * Cmd<Msg> =
         match msg with
         | SelectTool tool -> { model with Tool = tool }, Cmd.none
         | SelectPattern _ -> model, Cmd.none
-        | CanvasMouseDown _ -> model, Cmd.none
-        | CanvasMouseMove _ -> model, Cmd.none
-        | CanvasMouseUp _ -> model, Cmd.none
+        | CanvasMouseDown(position, modifiers) ->
+            let nextCanvas =
+                if model.Tool = Pencil then
+                    drawPixelAt position model.Canvas
+                else
+                    model.Canvas
+
+            let nextMouse = {
+                IsDown = true
+                Start = Some position
+                Last = Some position
+                Current = Some position
+                Modifiers = modifiers
+            }
+
+            { model with Canvas = nextCanvas; Mouse = nextMouse }, Cmd.none
+        | CanvasMouseMove(position, modifiers) ->
+            let nextCanvas =
+                if model.Mouse.IsDown && model.Tool = Pencil then
+                    drawPixelAt position model.Canvas
+                else
+                    model.Canvas
+
+            let nextMouse = {
+                model.Mouse with
+                    Last = model.Mouse.Current
+                    Current = Some position
+                    Modifiers = modifiers
+            }
+
+            { model with Canvas = nextCanvas; Mouse = nextMouse }, Cmd.none
+        | CanvasMouseUp(position, modifiers) ->
+            let nextMouse = {
+                model.Mouse with
+                    IsDown = false
+                    Last = model.Mouse.Current
+                    Current = Some position
+                    Start = None
+                    Modifiers = modifiers
+            }
+
+            { model with Mouse = nextMouse }, Cmd.none
         | Undo -> model, Cmd.none
         | Redo -> model, Cmd.none
         | ClearSelection -> model, Cmd.none
