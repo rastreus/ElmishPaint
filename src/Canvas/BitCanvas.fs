@@ -1,6 +1,7 @@
 namespace App.Canvas
 
 open App
+open Browser
 open Fable.Core.JS
 
 [<RequireQualifiedAccess>]
@@ -53,6 +54,32 @@ module BitCanvas =
     let fill bit (canvas: App.BitCanvas) =
         let fillValue = if bit = Black then 255uy else 0uy
         canvas.Data.fill (fillValue) |> ignore
+
+    let toImageData scale (canvas: App.BitCanvas) =
+        if scale < 1 then
+            invalidArg "scale" "Scale must be at least 1."
+
+        let outputWidth = canvas.Width * scale
+        let outputHeight = canvas.Height * scale
+
+        let outputData: byte array =
+            Microsoft.FSharp.Collections.Array.zeroCreate (outputWidth * outputHeight * 4)
+
+        for y in 0 .. (canvas.Height - 1) do
+            for x in 0 .. (canvas.Width - 1) do
+                let channel = if getPixel x y canvas = Black then 0uy else 255uy
+                let outputY = y * scale
+                let outputX = x * scale
+
+                for dy in 0 .. (scale - 1) do
+                    for dx in 0 .. (scale - 1) do
+                        let baseIndex = (((outputY + dy) * outputWidth) + outputX + dx) * 4
+                        outputData[baseIndex] <- channel
+                        outputData[baseIndex + 1] <- channel
+                        outputData[baseIndex + 2] <- channel
+                        outputData[baseIndex + 3] <- 255uy
+
+        Dom.ImageData.Create(outputData, float outputWidth, float outputHeight)
 
     let clear canvas = fill White canvas
 
