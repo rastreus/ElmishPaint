@@ -309,6 +309,111 @@ describe "MyComponent" (fun () ->
 
 Run tests with `pnpm test`.
 
+## Testing Elmish Update Functions
+
+This project does NOT use `Fable.FastCheck` or `Fable.FastCheck.Jest`. Use the
+Vitest bindings above with these lightweight helper patterns for testing `init`
+and `update` functions.
+
+### Helper Functions (define in your test file)
+
+```fsharp
+/// Dispatch a single message, return the new model (discard Cmd)
+let dispatchMsg msg model =
+    let newModel, _cmd = update msg model
+    newModel
+
+/// Dispatch a sequence of messages, return the final model
+let dispatchMsgs msgs model =
+    msgs |> List.fold (fun m msg -> dispatchMsg msg m) model
+
+/// Get both model and cmd from a dispatch (when testing side effects)
+let dispatchWithCmd msg model =
+    update msg model
+```
+
+### Testing Update Purity
+
+```fsharp
+Vitest.describe (
+    "update purity",
+    fun () ->
+        Vitest.test (
+            "same input produces same output",
+            fun () ->
+                let model = fst (init ())
+                let r1 = dispatchMsg (SelectTool Line) model
+                let r2 = dispatchMsg (SelectTool Line) model
+                Vitest.expect(r1).toEqual (r2)
+        )
+)
+```
+
+### Testing State Transitions
+
+```fsharp
+Vitest.describe (
+    "SelectTool",
+    fun () ->
+        Vitest.test (
+            "changes active tool",
+            fun () ->
+                let model = fst (init ())
+                let result = dispatchMsg (SelectTool Line) model
+                Vitest.expect(result.Tool).toEqual (Line)
+        )
+
+        Vitest.test (
+            "does not affect unrelated state",
+            fun () ->
+                let model = fst (init ())
+                let result = dispatchMsg (SelectTool Line) model
+                Vitest.expect(result.Canvas).toEqual (model.Canvas)
+        )
+)
+```
+
+### Testing Init
+
+```fsharp
+Vitest.describe (
+    "init",
+    fun () ->
+        Vitest.test (
+            "returns valid default model",
+            fun () ->
+                let model, cmd = init ()
+                Vitest.expect(model.Tool).toEqual (Pencil)
+                Vitest.expect(model.UI.Zoom).toEqual (1)
+                // Cmd.none produces an empty command list
+                Vitest.expect(cmd).toEqual (Elmish.Cmd.none)
+        )
+)
+```
+
+### Testing Message Sequences
+
+```fsharp
+Vitest.test (
+    "undo after tool change restores previous tool",
+    fun () ->
+        let model = fst (init ())
+        let result =
+            model
+            |> dispatchMsg (SelectTool Line)
+            |> dispatchMsg Undo
+        Vitest.expect(result.Tool).toEqual (Pencil)
+)
+```
+
+### Key Principles
+
+- **Test `update` directly** — don't render components just to test state logic.
+- **One Msg case per test** — isolate behavior. Test composition separately.
+- **Assert what changed AND what didn't** — catch accidental mutations.
+- **Use `dispatchMsgs` for sequences** — test multi-step workflows like draw→undo→redo.
+- **Cmd is usually `Cmd.none`** — only use `dispatchWithCmd` when testing side-effect-producing messages.
+
 ## Documentation Reference
 
 Full v3 docs: https://fable-hub.github.io/Feliz/
