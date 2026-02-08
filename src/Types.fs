@@ -13,25 +13,26 @@ type Tool =
     | FloodFill
     | Marquee
 
-type Pattern =
-    { Id: string
-      Name: string
-      Tile: bool array2d }
+type Pattern = {
+    Id: string
+    Name: string
+    Tile: bool array2d
+}
 
-type Modifiers =
-    { Shift: bool
-      Ctrl: bool
-      Alt: bool
-      Meta: bool }
+type Modifiers = {
+    Shift: bool
+    Ctrl: bool
+    Alt: bool
+    Meta: bool
+}
 
-type Point =
-    { X: int
-      Y: int }
+type Point = { X: int; Y: int }
 
-type BitCanvas =
-    { Width: int
-      Height: int
-      Data: byte array }
+type BitCanvas = {
+    Width: int
+    Height: int
+    Data: byte array
+}
 
 type BrushSize =
     | Brush1
@@ -43,39 +44,45 @@ type RectangleMode =
     | Outline
     | Filled
 
-type ToolOptions =
-    { EraserBrushSize: BrushSize
-      RectangleMode: RectangleMode }
+type ToolOptions = {
+    EraserBrushSize: BrushSize
+    RectangleMode: RectangleMode
+}
 
-type MouseState =
-    { IsDown: bool
-      Start: Point option
-      Last: Point option
-      Current: Point option
-      Modifiers: Modifiers }
+type MouseState = {
+    IsDown: bool
+    Start: Point option
+    Last: Point option
+    Current: Point option
+    Modifiers: Modifiers
+}
 
-type Selection =
-    { BoundsStart: Point
-      BoundsEnd: Point
-      FloatingPixels: BitCanvas option
-      Offset: Point }
+type Selection = {
+    BoundsStart: Point
+    BoundsEnd: Point
+    FloatingPixels: BitCanvas option
+    Offset: Point
+}
 
-type HistoryState =
-    { UndoStack: BitCanvas list
-      RedoStack: BitCanvas list
-      MaxDepth: int }
+type HistoryState = {
+    UndoStack: BitCanvas list
+    RedoStack: BitCanvas list
+    MaxDepth: int
+}
 
-type UIState =
-    { Zoom: int
-      Scroll: Point
-      HoveredPixel: Point option
-      IsBezelMode: bool }
+type UIState = {
+    Zoom: int
+    Scroll: Point
+    HoveredPixel: Point option
+    IsBezelMode: bool
+}
 
-type ImportPreview =
-    { FileName: string
-      ThresholdOffset: int
-      Brightness: int
-      PreviewCanvas: BitCanvas }
+type ImportPreview = {
+    FileName: string
+    ThresholdOffset: int
+    Brightness: int
+    PreviewCanvas: BitCanvas
+}
 
 type ExportScale =
     | Scale1x
