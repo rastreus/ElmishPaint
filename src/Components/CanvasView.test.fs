@@ -12,6 +12,12 @@ let private modelWithZoom zoom =
     let model = defaultModel ()
     { model with UI = { model.UI with Zoom = zoom } }
 
+let private getStrokeCalls (canvas: HTMLCanvasElement) =
+    if isNullOrUndefined canvas?__strokeCalls then
+        0
+    else
+        unbox<int> canvas?__strokeCalls
+
 Vitest.describe (
     "CanvasView",
     fun () ->
@@ -125,5 +131,23 @@ Vitest.describe (
                 match dispatchedMessage with
                 | Some (CanvasMouseDown(point, _)) -> Vitest.expect(point).toEqual ({ X = 10; Y = 21 })
                 | _ -> failwith "expected a zoom-mapped CanvasMouseDown message"
+        )
+
+        Vitest.test (
+            "draws pixel grid overlay at zoom 4 and above",
+            fun () ->
+                let view = RTL.render (CanvasView (modelWithZoom 4) ignore)
+                let canvas = view.getByTestId ("paint-canvas") :?> HTMLCanvasElement
+
+                Vitest.expect(getStrokeCalls canvas).toBeGreaterThan (0)
+        )
+
+        Vitest.test (
+            "does not draw pixel grid overlay below zoom 4",
+            fun () ->
+                let view = RTL.render (CanvasView (modelWithZoom 2) ignore)
+                let canvas = view.getByTestId ("paint-canvas") :?> HTMLCanvasElement
+
+                Vitest.expect(getStrokeCalls canvas).toBe (0)
         )
 )

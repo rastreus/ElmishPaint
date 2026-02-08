@@ -66,13 +66,22 @@ if (typeof HTMLCanvasElement !== 'undefined') {
       const element = this as HTMLCanvasElement & {
         __lastImageData?: ImageData;
         __putImageDataCalls?: number;
+        __strokeCalls?: number;
       };
 
       return {
         imageSmoothingEnabled: false,
+        strokeStyle: '#000000',
+        lineWidth: 1,
         putImageData(imageData: ImageData) {
           element.__lastImageData = imageData;
           element.__putImageDataCalls = (element.__putImageDataCalls ?? 0) + 1;
+        },
+        beginPath() {},
+        moveTo() {},
+        lineTo() {},
+        stroke() {
+          element.__strokeCalls = (element.__strokeCalls ?? 0) + 1;
         },
       };
     },
