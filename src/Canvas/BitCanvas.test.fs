@@ -37,4 +37,63 @@ Vitest.describe (
                 Vitest.expect(BitCanvas.getPixel BitCanvas.Width 0 canvas).toEqual(White)
                 Vitest.expect(BitCanvas.getPixel 0 BitCanvas.Height canvas).toEqual(White)
         )
+
+        Vitest.test (
+            "setPixel writes black and white values at addressed coordinates",
+            fun () ->
+                let canvas = BitCanvas.create ()
+
+                BitCanvas.setPixel 0 0 Black canvas
+                BitCanvas.setPixel 511 341 Black canvas
+                BitCanvas.setPixel 257 129 Black canvas
+                BitCanvas.setPixel 257 129 White canvas
+
+                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual(Black)
+                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual(Black)
+                Vitest.expect(BitCanvas.getPixel 257 129 canvas).toEqual(White)
+        )
+
+        Vitest.test (
+            "setPixel out of bounds is a no-op",
+            fun () ->
+                let canvas = BitCanvas.create ()
+
+                BitCanvas.setPixel 10 10 Black canvas
+                BitCanvas.setPixel -1 10 White canvas
+                BitCanvas.setPixel 10 -1 White canvas
+                BitCanvas.setPixel BitCanvas.Width 10 White canvas
+                BitCanvas.setPixel 10 BitCanvas.Height White canvas
+
+                Vitest.expect(BitCanvas.getPixel 10 10 canvas).toEqual(Black)
+        )
+
+        Vitest.test (
+            "fill and clear update every pixel",
+            fun () ->
+                let canvas = BitCanvas.create ()
+
+                BitCanvas.fill Black canvas
+                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual(Black)
+                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual(Black)
+
+                BitCanvas.clear canvas
+                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual(White)
+                Vitest.expect(BitCanvas.getPixel 511 341 canvas).toEqual(White)
+        )
+
+        Vitest.test (
+            "clone produces deep copy",
+            fun () ->
+                let original = BitCanvas.create ()
+                BitCanvas.setPixel 20 20 Black original
+
+                let copy = BitCanvas.clone original
+                BitCanvas.setPixel 20 20 White copy
+                BitCanvas.setPixel 40 40 Black copy
+
+                Vitest.expect(BitCanvas.getPixel 20 20 original).toEqual(Black)
+                Vitest.expect(BitCanvas.getPixel 20 20 copy).toEqual(White)
+                Vitest.expect(BitCanvas.getPixel 40 40 original).toEqual(White)
+                Vitest.expect(BitCanvas.getPixel 40 40 copy).toEqual(Black)
+        )
 )
