@@ -14,13 +14,31 @@ if (typeof globalThis.ImageData === 'undefined') {
       maybeHeight?: number
     ) {
       if (typeof dataOrWidth === 'number') {
+        if (!Number.isInteger(dataOrWidth) || !Number.isInteger(widthOrHeight)) {
+          throw new TypeError('ImageData width/height must be integers');
+        }
+
         this.width = dataOrWidth;
         this.height = widthOrHeight;
         this.data = new Uint8ClampedArray(this.width * this.height * 4);
       } else {
+        if (!(dataOrWidth instanceof Uint8ClampedArray)) {
+          throw new TypeError('ImageData data must be Uint8ClampedArray');
+        }
+
+        if (!Number.isInteger(widthOrHeight) || !Number.isInteger(maybeHeight)) {
+          throw new TypeError('ImageData width/height must be integers');
+        }
+
         this.width = widthOrHeight;
-        this.height = maybeHeight ?? 0;
-        this.data = new Uint8ClampedArray(dataOrWidth);
+        this.height = maybeHeight;
+        const expectedLength = this.width * this.height * 4;
+
+        if (dataOrWidth.length !== expectedLength) {
+          throw new TypeError('ImageData data length does not match width/height');
+        }
+
+        this.data = dataOrWidth;
       }
     }
   }
