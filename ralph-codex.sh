@@ -47,6 +47,7 @@ CODEX_FLAGS=(
   --add-dir .git
   --add-dir "$PNPM_STORE"
   --add-dir "$COREPACK_CACHE"
+  --add-dir "$HOME/.pyenv"
   --json
   -o "$CODEX_OUTPUT_FILE"
 )
