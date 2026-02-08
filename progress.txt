@@ -49,3 +49,13 @@ Date: 2026-02-08T05:36:26Z
 - Applied formatting updates to `src/Canvas/BitCanvas.fs` and `src/Canvas/BitCanvas.test.fs`.
 - Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: none.
+## Iteration 5 — S05-elmish-runtime — Elmish runtime wiring with Feliz.UseElmish
+Date: 2026-02-08T07:02:21Z
+- Added `src/Update.fs` with `Runtime.init` default model + blank `BitCanvas` and exhaustive `Runtime.update`; `SelectTool` updates `model.Tool`, all other `Msg` cases return unchanged model + `Cmd.none`.
+- Wired `src/App.fs` to `React.useElmish(Runtime.init, Runtime.update, [| |])` and added minimal runtime UI state display/dispatch controls.
+- Added update/runtime tests in `src/Update.test.fs` for default init state, `SelectTool` transition, `Cmd.none`, and purity (same input -> same output).
+- Extended `src/App.test.fs` to verify dispatching `SelectTool` triggers re-render (`Active tool: Pencil` -> `Active tool: Line`).
+- Updated `src/ElmishPaint.fsproj` compile order for `Update.fs` and `Update.test.fs`; formatted modified runtime files with Fantomas.
+- Gotcha: Fable in this repo rejects runtime `array2d` creation helpers; default pattern tile in S05 uses placeholder until pattern story implementation.
+- Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: added discovered pattern for `array2d` helper incompatibility.

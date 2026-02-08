@@ -81,7 +81,7 @@
         "Vitest tests verify update is pure: same input → same output",
         "dotnet fable src compiles with zero warnings"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S06-canvas-render",
