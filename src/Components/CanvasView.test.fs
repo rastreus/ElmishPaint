@@ -25,9 +25,10 @@ Vitest.describe (
             "renders BitCanvas pixels to 2D canvas context",
             fun () ->
                 let model = defaultModel ()
+
                 let nextModel, _ =
-                    Runtime.update (
-                        CanvasMouseDown (
+                    Runtime.update
+                        (CanvasMouseDown(
                             { X = 0; Y = 0 },
                             {
                                 Shift = false
@@ -35,8 +36,8 @@ Vitest.describe (
                                 Alt = false
                                 Meta = false
                             }
-                        )
-                    ) model
+                        ))
+                        model
 
                 let view = RTL.render (CanvasView nextModel ignore)
                 let canvas = view.getByTestId ("paint-canvas") :?> HTMLCanvasElement
@@ -56,46 +57,35 @@ Vitest.describe (
             "dispatches canvas mouse messages with pixel coordinates",
             fun () ->
                 let mutable dispatchedMessages: Msg list = []
-                let dispatch message = dispatchedMessages <- message :: dispatchedMessages
+
+                let dispatch message =
+                    dispatchedMessages <- message :: dispatchedMessages
+
                 let view = RTL.render (CanvasView (defaultModel ()) dispatch)
                 let canvas = view.getByTestId ("paint-canvas")
 
                 RTL.fireEvent.custom (
                     "mouseDown",
                     canvas,
-                    createObj [
-                        "clientX" ==> 10
-                        "clientY" ==> 20
-                        "shiftKey" ==> true
-                    ]
+                    createObj [ "clientX" ==> 10; "clientY" ==> 20; "shiftKey" ==> true ]
                 )
 
                 RTL.fireEvent.custom (
                     "mouseMove",
                     canvas,
-                    createObj [
-                        "clientX" ==> 11
-                        "clientY" ==> 21
-                        "ctrlKey" ==> true
-                    ]
+                    createObj [ "clientX" ==> 11; "clientY" ==> 21; "ctrlKey" ==> true ]
                 )
 
                 RTL.fireEvent.custom (
                     "mouseUp",
                     canvas,
-                    createObj [
-                        "clientX" ==> 12
-                        "clientY" ==> 22
-                        "altKey" ==> true
-                    ]
+                    createObj [ "clientX" ==> 12; "clientY" ==> 22; "altKey" ==> true ]
                 )
 
                 match List.rev dispatchedMessages with
-                | [
-                    CanvasMouseDown(downPoint, downMods)
+                | [ CanvasMouseDown(downPoint, downMods)
                     CanvasMouseMove(movePoint, moveMods)
-                    CanvasMouseUp(upPoint, upMods)
-                  ] ->
+                    CanvasMouseUp(upPoint, upMods) ] ->
                     Vitest.expect(downPoint).toEqual ({ X = 10; Y = 20 })
                     Vitest.expect(movePoint).toEqual ({ X = 11; Y = 21 })
                     Vitest.expect(upPoint).toEqual ({ X = 12; Y = 22 })

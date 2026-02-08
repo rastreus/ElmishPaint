@@ -44,15 +44,9 @@ Vitest.describe (
                 Vitest.expect(before.data[0]).toBe (255uy)
 
                 do!
-                    RTL.act (fun () ->
-                        promise {
-                            RTL.fireEvent.custom (
-                                "mouseDown",
-                                canvas,
-                                createObj [ "clientX" ==> 0; "clientY" ==> 0 ]
-                            )
-                        }
-                    )
+                    RTL.act (fun () -> promise {
+                        RTL.fireEvent.custom ("mouseDown", canvas, createObj [ "clientX" ==> 0; "clientY" ==> 0 ])
+                    })
 
                 let after: ImageData = unbox canvas?__lastImageData
                 Vitest.expect(after.data[0]).toBe (0uy)

@@ -73,7 +73,12 @@ module Runtime =
                 Modifiers = modifiers
             }
 
-            { model with Canvas = nextCanvas; Mouse = nextMouse }, Cmd.none
+            {
+                model with
+                    Canvas = nextCanvas
+                    Mouse = nextMouse
+            },
+            Cmd.none
         | CanvasMouseMove(position, modifiers) ->
             let nextCanvas =
                 if model.Mouse.IsDown && model.Tool = Pencil then
@@ -88,7 +93,12 @@ module Runtime =
                     Modifiers = modifiers
             }
 
-            { model with Canvas = nextCanvas; Mouse = nextMouse }, Cmd.none
+            {
+                model with
+                    Canvas = nextCanvas
+                    Mouse = nextMouse
+            },
+            Cmd.none
         | CanvasMouseUp(position, modifiers) ->
             let nextMouse = {
                 model.Mouse with

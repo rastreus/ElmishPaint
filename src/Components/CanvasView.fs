@@ -13,12 +13,9 @@ let private toModifiers (ev: MouseEvent) = {
 }
 
 let private clamp minimum maximum value =
-    if value < minimum then
-        minimum
-    elif value > maximum then
-        maximum
-    else
-        value
+    if value < minimum then minimum
+    elif value > maximum then maximum
+    else value
 
 let private toCanvasPoint (canvas: HTMLCanvasElement) (ev: MouseEvent) =
     let rect = canvas.getBoundingClientRect ()
@@ -43,7 +40,7 @@ let CanvasView (model: Model) (dispatch: Msg -> unit) =
             | context ->
                 let canvasContext = context :?> CanvasRenderingContext2D
                 canvasContext.imageSmoothingEnabled <- false
-                canvasContext.putImageData(BitCanvas.toImageData 1 model.Canvas, 0.0, 0.0)
+                canvasContext.putImageData (BitCanvas.toImageData 1 model.Canvas, 0.0, 0.0)
     )
 
     let dispatchMouseEvent makeMsg (ev: MouseEvent) =
