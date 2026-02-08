@@ -66,7 +66,8 @@ module BitCanvas =
         let outputWidth = canvas.Width * scale
         let outputHeight = canvas.Height * scale
 
-        let outputData = Constructors.Uint8ClampedArray.Create(outputWidth * outputHeight * 4)
+        let outputData =
+            Constructors.Uint8ClampedArray.Create(outputWidth * outputHeight * 4)
 
         for y in 0 .. (canvas.Height - 1) do
             for x in 0 .. (canvas.Width - 1) do
