@@ -141,4 +141,30 @@ Vitest.describe (
                 Vitest.expect(imageData.data[6]).toBe (255uy)
                 Vitest.expect(imageData.data[7]).toBe (255uy)
         )
+
+        Vitest.test (
+            "toImageData at scale 2 expands each source pixel into a 2x2 block",
+            fun () ->
+                let canvas = BitCanvas.create ()
+                BitCanvas.setPixel 2 3 Black canvas
+
+                let imageData = BitCanvas.toImageData 2 canvas
+                let outputWidth = BitCanvas.Width * 2
+
+                Vitest.expect(imageData.width).toBe (float outputWidth)
+                Vitest.expect(imageData.height).toBe (float (BitCanvas.Height * 2))
+
+                let pixelOffset x y = ((y * outputWidth) + x) * 4
+                let topLeft = pixelOffset 4 6
+                let topRight = pixelOffset 5 6
+                let bottomLeft = pixelOffset 4 7
+                let bottomRight = pixelOffset 5 7
+                let outside = pixelOffset 6 6
+
+                Vitest.expect(imageData.data[topLeft]).toBe (0uy)
+                Vitest.expect(imageData.data[topRight]).toBe (0uy)
+                Vitest.expect(imageData.data[bottomLeft]).toBe (0uy)
+                Vitest.expect(imageData.data[bottomRight]).toBe (0uy)
+                Vitest.expect(imageData.data[outside]).toBe (255uy)
+        )
 )
