@@ -2,6 +2,7 @@ module Tests.Canvas.BitCanvas
 
 open App
 open App.Canvas
+open Browser
 open Vitest
 
 Vitest.describe (
@@ -166,5 +167,47 @@ Vitest.describe (
                 Vitest.expect(imageData.data[bottomLeft]).toBe (0uy)
                 Vitest.expect(imageData.data[bottomRight]).toBe (0uy)
                 Vitest.expect(imageData.data[outside]).toBe (255uy)
+        )
+
+        Vitest.test (
+            "fromImageData thresholds pixels to black and white",
+            fun () ->
+                let pixels: byte array = [|
+                    0uy; 0uy; 0uy; 255uy
+                    200uy; 200uy; 200uy; 255uy
+                    127uy; 127uy; 127uy; 255uy
+                    128uy; 128uy; 128uy; 255uy
+                |]
+
+                let imageData = Dom.ImageData.Create(pixels, 2.0, 2.0)
+                let canvas = BitCanvas.fromImageData imageData
+
+                Vitest.expect(BitCanvas.getPixel 0 0 canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 1 0 canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 0 1 canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 1 1 canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "fromImageData (toImageData 1 canvas) returns identical bit canvas",
+            fun () ->
+                let original = BitCanvas.create ()
+
+                for y in 0 .. (BitCanvas.Height - 1) do
+                    for x in 0 .. (BitCanvas.Width - 1) do
+                        if ((x * 3) + (y * 5)) % 7 = 0 then
+                            BitCanvas.setPixel x y Black original
+
+                let imageData = BitCanvas.toImageData 1 original
+                let roundTripped = BitCanvas.fromImageData imageData
+
+                let mutable mismatches = 0
+
+                for y in 0 .. (BitCanvas.Height - 1) do
+                    for x in 0 .. (BitCanvas.Width - 1) do
+                        if BitCanvas.getPixel x y roundTripped <> BitCanvas.getPixel x y original then
+                            mismatches <- mismatches + 1
+
+                Vitest.expect(mismatches).toBe (0)
         )
 )
