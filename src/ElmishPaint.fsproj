@@ -13,6 +13,7 @@
         <Compile Include="Components/CanvasView.fs" />
         <Compile Include="App.fs" />
         <Compile Include="App.test.fs" />
+        <Compile Include="Components/CanvasView.test.fs" />
         <Compile Include="Update.test.fs" />
         <Compile Include="Canvas/BitCanvas.test.fs" />
         <Compile Include="Main.fs" />
