@@ -358,6 +358,10 @@ git-cliff --output CHANGELOG.md
   `jj new`, `jj restore` all work inside the Codex sandbox. If jj operations
   fail with "Operation not permitted", check that `.git` is in the add-dir list.
   pnpm/corepack caches are also granted via `--add-dir`.
+- Fable 5 in this repo does not support runtime creation helpers for `array2d`
+  (`Array2D.create`, `Array2D.init`, `array2D`). Do not construct default
+  `bool array2d` tiles in `init`; defer concrete pattern tile construction to
+  the patterns story to avoid transpilation errors.
 
 ---
 
