@@ -32,7 +32,7 @@
         ".fsproj file order is correct: Types.fs before Model.fs before Msg.fs",
         "dotnet fable src compiles with zero warnings"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S03-bitcanvas",

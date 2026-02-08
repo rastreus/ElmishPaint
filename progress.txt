@@ -22,3 +22,12 @@ Date: 2026-02-08
 - Fixed SKILL.md for feliz-v3: added YAML frontmatter required by Codex skill loader.
 - Dropped model_reasoning_effort from xhigh to high for faster iterations.
 - Added --json flag for better visibility into agent progress.
+## Iteration 2 — S02-types — Core type definitions: Bit, Tool, Pattern, Modifiers, Model, Msg
+Date: 2026-02-08T01:40:40Z
+- Added `src/Types.fs` with shared core and state types: `Bit`, `Tool`, `Pattern`, `Modifiers`, `Point`, `BitCanvas`, `ToolOptions`, `MouseState`, `Selection`, `HistoryState`, `UIState`, `ImportPreview`, `ExportScale`.
+- Added `src/Model.fs` with required top-level `Model` fields: `Canvas`, `Tool`, `ToolOptions`, `Pattern`, `Mouse`, `Selection`, `History`, `UI`, `ImportPreview`.
+- Added `src/Msg.fs` with full required `Msg` DU cases, including canvas mouse events, history commands, selection actions, import/export, zoom/scroll, and keyboard input.
+- Updated `src/ElmishPaint.fsproj` compile order to `Types.fs` -> `Model.fs` -> `Msg.fs` before app files.
+- Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Decision: kept `BitCanvas.Data` as `byte array` for S02 type stability; concrete backing implementation can be specialized in S03.
+- AGENTS.md updates made: none.
