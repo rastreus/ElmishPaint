@@ -1,10 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import fable from 'vite-plugin-fable'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [fable({ fsproj: './src/ElmishPaint.fsproj', jsx: 'automatic' }), react(), tailwindcss()],
+  plugins: [react(), tailwindcss()],
   root: "./src",
   build: {
     outDir: "../dist",
