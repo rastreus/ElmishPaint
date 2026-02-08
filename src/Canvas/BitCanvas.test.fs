@@ -173,10 +173,22 @@ Vitest.describe (
             "fromImageData thresholds pixels to black and white",
             fun () ->
                 let pixels: byte array = [|
-                    0uy; 0uy; 0uy; 255uy
-                    200uy; 200uy; 200uy; 255uy
-                    127uy; 127uy; 127uy; 255uy
-                    128uy; 128uy; 128uy; 255uy
+                    0uy
+                    0uy
+                    0uy
+                    255uy
+                    200uy
+                    200uy
+                    200uy
+                    255uy
+                    127uy
+                    127uy
+                    127uy
+                    255uy
+                    128uy
+                    128uy
+                    128uy
+                    255uy
                 |]
 
                 let imageData = Dom.ImageData.Create(pixels, 2.0, 2.0)
