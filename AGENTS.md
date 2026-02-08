@@ -72,6 +72,7 @@ expertise. AGENTS.md defines *project policy*. Skills define *tool knowledge*.
 | Skill             | Purpose                       | When to load                          |
 |-------------------|-------------------------------|---------------------------------------|
 | `jj-vcs`          | Jujutsu version control       | Any VCS operation                     |
+| `agent-browser`   | Headless browser verification | Runtime error checking (§6)           |
 
 ### 2.2 Skill Precedence
 
@@ -259,8 +260,11 @@ Step 5: (if needed) Add Cmd + result Msg pair    → feat(scope): add X effect
 Run ALL before marking a story complete. **Do not commit if any fails.**
 
 ```bash
+# F# compilation check (catches type errors Fable may miss)
+dotnet build
+
 # F# compilation via Fable (zero warnings)
-dotnet fable src
+dotnet fable src -e fs.jsx
 
 # Vitest JS-level tests (if applicable)
 pnpm test
@@ -270,12 +274,11 @@ pnpm build
 
 # F# formatting check
 dotnet fantomas --check src/
-```
 
-E2E tests (run periodically, not every commit):
-
-```bash
-dotnet run --project e2e/E2E.fsproj
+# Runtime verification (catches errors mocks/jsdom cannot)
+# Load the agent-browser skill, then:
+# Start dev server, open app, check `agent-browser errors` returns clean.
+# Required for any story that changes rendering or browser API usage.
 ```
 
 ---
@@ -362,6 +365,13 @@ git-cliff --output CHANGELOG.md
   (`Array2D.create`, `Array2D.init`, `array2D`). Do not construct default
   `bool array2d` tiles in `init`; defer concrete pattern tile construction to
   the patterns story to avoid transpilation errors.
+- `dotnet build` must be run as the first verification step; Fable transpilation alone does not catch all F# compilation errors (e.g., FS0247 namespace/module collisions).
+- `Dom.ImageData.Create` requires a `Uint8ClampedArray` (not a plain `byte array`) and integer dimensions — passing floats causes a runtime `TypeError`.
+- Unit tests with jsdom mocks can miss real browser API mismatches (e.g.,
+  `ImageData` constructor signature differences). After any story that touches
+  rendering or browser APIs, run `agent-browser errors` (if available) against the live dev
+  server to catch runtime `TypeError`/`ReferenceError` that mocks hide.
+- Avoid `module A.B.C` declarations when `namespace A.B` is also used elsewhere in the assembly; use explicit `namespace` + nested `module` instead.
 
 ---
 

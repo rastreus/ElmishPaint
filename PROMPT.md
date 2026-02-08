@@ -59,7 +59,7 @@ Follow the TCR loop from AGENTS.md exactly:
 ```
 jj desc -m "type(scope): description"
 # make small change
-dotnet fable src -e fs.jsx --verbose
+dotnet fable src -e fs.jsx
 pnpm test
 # green → jj new
 # red   → jj restore
@@ -70,11 +70,16 @@ pnpm test
 Before marking the story complete, run ALL feedback loops:
 
 ```bash
-dotnet fable src -e fs.jsx --verbose       # Fable transpilation, zero warnings
+dotnet build                               # F# type checking (catches errors Fable misses)
+dotnet fable src -e fs.jsx                 # Fable transpilation, zero warnings
 pnpm test                                  # Vitest unit tests
 pnpm build                                 # Production build (Fable + Vite)
 dotnet fantomas --check src/               # Code formatting
 ```
+
+**If your story changes rendering or browser API usage**, also run runtime
+verification. Load `.agents/skills/agent-browser/SKILL.md` for the workflow.
+Check that `agent-browser errors` returns no uncaught exceptions.
 
 ALL must pass. If any fails, fix it before proceeding.
 

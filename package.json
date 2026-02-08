@@ -2,11 +2,11 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "transpile": "dotnet fable src -e fs.jsx --verbose",
+    "transpile": "dotnet fable src -e fs.jsx",
     "start": "vite dev",
     "build": "vite build",
     "clean": "dotnet fable clean src -e fs.jsx --yes",
-    "test": "pnpm clean && dotnet fable src -e fs.jsx --verbose && vitest run"
+    "test": "pnpm clean && dotnet fable src -e fs.jsx && vitest run"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
