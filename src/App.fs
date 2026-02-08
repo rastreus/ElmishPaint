@@ -6,7 +6,7 @@ open Feliz.UseElmish
 open App.Components.CanvasView
 
 [<Erase; Mangle(false)>]
-type Components =
+type AppRoot =
 
     [<ReactComponent(true)>]
     static member App() =

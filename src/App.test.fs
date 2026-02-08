@@ -11,7 +11,7 @@ Vitest.describe (
         Vitest.test (
             "renders hello heading with tailwind classes",
             fun () -> promise {
-                let ele = RTL.render (App.Components.App())
+                let ele = RTL.render (App.AppRoot.App())
                 let title = ele.getByTestId ("hello-title")
 
                 Vitest.expect(title).toBeInTheDocument ()
@@ -23,7 +23,7 @@ Vitest.describe (
         Vitest.test (
             "dispatching SelectTool updates rendered active tool",
             fun () -> promise {
-                let ele = RTL.render (App.Components.App())
+                let ele = RTL.render (App.AppRoot.App())
                 let activeTool = ele.getByTestId ("active-tool")
                 let selectLine = ele.getByTestId ("select-line")
 
@@ -38,7 +38,7 @@ Vitest.describe (
         Vitest.test (
             "canvas mousedown updates pixel and rerenders image data",
             fun () -> promise {
-                let ele = RTL.render (App.Components.App())
+                let ele = RTL.render (App.AppRoot.App())
                 let canvas = ele.getByTestId ("paint-canvas") :?> HTMLCanvasElement
                 let before: ImageData = unbox canvas?__lastImageData
                 Vitest.expect(before.data[0]).toBe (255uy)
