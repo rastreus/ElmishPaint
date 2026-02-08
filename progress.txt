@@ -30,7 +30,6 @@ Date: 2026-02-08T01:40:40Z
 - Updated `src/ElmishPaint.fsproj` compile order to `Types.fs` -> `Model.fs` -> `Msg.fs` before app files.
 - Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Decision: kept `BitCanvas.Data` as `byte array` for S02 type stability; concrete backing implementation can be specialized in S03.
-- AGENTS.md updates made: none.
 ## Iteration 3 — S03-bitcanvas — BitCanvas data structure and core operations
 Date: 2026-02-08T03:33:39Z
 - Implemented packed 1-bit canvas operations in `src/Canvas/BitCanvas.fs`: `create`, `getPixel`, `setPixel`, `fill`, `clear`, `clone` with 512x342 dimensions and out-of-bounds safety.
@@ -39,7 +38,6 @@ Date: 2026-02-08T03:33:39Z
 - Updated compile order in `src/ElmishPaint.fsproj` to include `Canvas/BitCanvas.fs` and `Canvas/BitCanvas.test.fs`.
 - Key decision: kept operations under `namespace App.Canvas` (`BitCanvas` module) to avoid F# name collision with the `App.BitCanvas` type defined in `Types.fs`.
 - Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
-- AGENTS.md updates made: none.
 ## Iteration 4 — S04-bitcanvas-imagedata — BitCanvas toImageData and fromImageData
 Date: 2026-02-08T05:36:26Z
 - Implemented `BitCanvas.toImageData` in `src/Canvas/BitCanvas.fs` with integer scale support; scale 1 outputs 512x342 and scale 2+ replicates source pixels into NxN blocks.
@@ -48,7 +46,6 @@ Date: 2026-02-08T05:36:26Z
 - Added a jsdom-only `ImageData` polyfill in `src/vitest-setup.ts` so `ImageData` constructor calls are testable in Node/Vitest.
 - Applied formatting updates to `src/Canvas/BitCanvas.fs` and `src/Canvas/BitCanvas.test.fs`.
 - Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
-- AGENTS.md updates made: none.
 ## Iteration 5 — S05-elmish-runtime — Elmish runtime wiring with Feliz.UseElmish
 Date: 2026-02-08T07:02:21Z
 - Added `src/Update.fs` with `Runtime.init` default model + blank `BitCanvas` and exhaustive `Runtime.update`; `SelectTool` updates `model.Tool`, all other `Msg` cases return unchanged model + `Cmd.none`.
@@ -70,14 +67,11 @@ Date: 2026-02-08T15:54:39Z
 - Added jsdom canvas 2D context shim in `src/vitest-setup.ts` to capture `putImageData` calls deterministically for rendering assertions.
 - Updated `src/ElmishPaint.fsproj` compile order for `Components/CanvasView.fs` and `Components/CanvasView.test.fs`; formatted modified F# files with Fantomas.
 - Verification passed: `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
-- AGENTS.md updates made: none.
 ## Iteration 7 — S06B-fix — Fix S06 build errors and harden verification pipeline
 Date: 2026-02-08T19:54:53Z
 - Fixed FS0247 by renaming top-level app container type from `Components` to `AppRoot` in `src/App.fs` and updating callsites in `src/Main.fs` and `src/App.test.fs`, removing the `App.Components` naming collision with `CanvasView` module path.
 - Fixed runtime ImageData constructor compatibility in `src/Canvas/BitCanvas.fs` by creating image data via JS interop with `new ImageData(Uint8ClampedArray, width, height)` so browser runtime uses clamped bytes and integer dimensions.
-- Removed `vite-plugin-fable` from `vite.config.js`, `package.json`, and `pnpm-lock.yaml`; switched scripts to explicit Fable transpilation (`start` watch mode, `build` transpile+vite build, `test` includes `dotnet build` + clean transpile run).
 - Hardened runtime verification in tests: `src/vitest-setup.ts` ImageData polyfill now enforces browser-like constructor semantics (requires `Uint8ClampedArray` + integer dimensions), and `src/Canvas/BitCanvas.test.fs` now constructs ImageData through explicit browser-style constructor interop.
 - Applied Fantomas formatting to touched F# files (`src/App.fs`, `src/App.test.fs`, `src/Main.fs`, `src/Canvas/BitCanvas.fs`, `src/Canvas/BitCanvas.test.fs`).
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx --verbose`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Runtime check note: attempted `agent-browser` verification against a live dev server, but Chromium launch is blocked in this sandbox (`mach_port_rendezvous` permission error); strict ImageData constructor checks were added to Vitest runtime shim as fallback coverage for this failure mode.
-- AGENTS.md updates made: none.
