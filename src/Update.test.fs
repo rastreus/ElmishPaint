@@ -154,6 +154,18 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "ExportPNG preserves model and emits one command effect",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 12 6 Black model.Canvas
+
+                let exportedModel, exportedCmd = Runtime.update (ExportPNG Scale1x) model
+
+                Vitest.expect(exportedModel).toEqual (model)
+                Vitest.expect(List.length exportedCmd).toBe (1)
+        )
+
+        Vitest.test (
             "KeyDown maps tool zoom history and export shortcuts",
             fun () ->
                 let model = fst (Runtime.init ())
