@@ -429,7 +429,8 @@ Vitest.describe (
                 Vitest.expect(List.length downModel.History.UndoStack).toBe (1)
                 Vitest.expect(downModel.Mouse.IsDown).toBe (false)
 
-                let upModel, _ = Runtime.update (CanvasMouseUp({ X = 2; Y = 2 }, noModifiers)) downModel
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 2; Y = 2 }, noModifiers)) downModel
 
                 Vitest.expect(upModel.Canvas).toEqual (downModel.Canvas)
                 Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
