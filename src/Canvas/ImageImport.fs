@@ -18,8 +18,7 @@ module ImageImport =
     let private supportedMimeTypes =
         set [ "image/png"; "image/jpeg"; "image/gif"; "image/webp" ]
 
-    let private supportedExtensions =
-        set [ ".png"; ".jpg"; ".jpeg"; ".gif"; ".webp" ]
+    let private supportedExtensions = set [ ".png"; ".jpg"; ".jpeg"; ".gif"; ".webp" ]
 
     let private clampSetting value =
         if value < MinSetting then MinSetting
@@ -73,7 +72,10 @@ module ImageImport =
 
     let fromImageData fileName (imageData: ImageData) =
         let grayscalePixels, sourceWidth, sourceHeight = Dithering.toGrayscale imageData
-        let scaledPixels = Dithering.scaleToFitCanvas grayscalePixels sourceWidth sourceHeight
+
+        let scaledPixels =
+            Dithering.scaleToFitCanvas grayscalePixels sourceWidth sourceHeight
+
         buildPreview fileName 0 0 scaledPixels
 
     let withThreshold thresholdOffset preview =
@@ -87,11 +89,14 @@ module ImageImport =
     let private nextTick () : JS.Promise<unit> =
         emitJsExpr () "new Promise(resolve => setTimeout(resolve, 0))"
 
-    let private getBitmapWidth (bitmap: obj) : int = emitJsExpr bitmap "Math.max(1, ($0.width|0))"
+    let private getBitmapWidth (bitmap: obj) : int =
+        emitJsExpr bitmap "Math.max(1, ($0.width|0))"
 
-    let private getBitmapHeight (bitmap: obj) : int = emitJsExpr bitmap "Math.max(1, ($0.height|0))"
+    let private getBitmapHeight (bitmap: obj) : int =
+        emitJsExpr bitmap "Math.max(1, ($0.height|0))"
 
-    let private closeBitmap (bitmap: obj) : unit = emitJsStatement bitmap "if ($0 && $0.close) { $0.close(); }"
+    let private closeBitmap (bitmap: obj) : unit =
+        emitJsStatement bitmap "if ($0 && $0.close) { $0.close(); }"
 
     let private renderBitmapToImageData (bitmap: obj) =
         let bitmapWidth = getBitmapWidth bitmap
@@ -124,16 +129,15 @@ module ImageImport =
 
             context.getImageData (0.0, 0.0, float targetWidth, float targetHeight)
 
-    let loadFromFile (file: File) =
-        promise {
+    let loadFromFile (file: File) = promise {
+        do! nextTick ()
+
+        let! bitmap = createImageBitmap file
+
+        try
+            let imageData = renderBitmapToImageData bitmap
             do! nextTick ()
-
-            let! bitmap = createImageBitmap file
-
-            try
-                let imageData = renderBitmapToImageData bitmap
-                do! nextTick ()
-                return fromImageData (getFileName file) imageData
-            finally
-                closeBitmap bitmap
-        }
+            return fromImageData (getFileName file) imageData
+        finally
+            closeBitmap bitmap
+    }

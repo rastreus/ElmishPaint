@@ -306,13 +306,23 @@ module Runtime =
             match model.ImportPreview with
             | Some preview ->
                 let nextPreview = ImageImport.withThreshold thresholdOffset preview
-                { model with ImportPreview = Some nextPreview }, Cmd.none
+
+                {
+                    model with
+                        ImportPreview = Some nextPreview
+                },
+                Cmd.none
             | None -> model, Cmd.none
         | SetImportBrightness brightness ->
             match model.ImportPreview with
             | Some preview ->
                 let nextPreview = ImageImport.withBrightness brightness preview
-                { model with ImportPreview = Some nextPreview }, Cmd.none
+
+                {
+                    model with
+                        ImportPreview = Some nextPreview
+                },
+                Cmd.none
             | None -> model, Cmd.none
         | ConfirmImport ->
             match model.ImportPreview with
@@ -325,12 +335,7 @@ module Runtime =
                 },
                 Cmd.none
             | None -> model, Cmd.none
-        | CancelImport ->
-            {
-                model with
-                    ImportPreview = None
-            },
-            Cmd.none
+        | CancelImport -> { model with ImportPreview = None }, Cmd.none
         | ExportPNG _ -> model, Cmd.none
         | SetZoom zoom ->
             if isSupportedZoom zoom then

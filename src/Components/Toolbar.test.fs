@@ -154,12 +154,10 @@ Vitest.describe (
                 let view = RTL.render (Toolbar (defaultModel ()) dispatch)
 
                 Vitest.expect(view.getByTestId ("toolbar-import-input")).toBeInTheDocument ()
+
                 Vitest
                     .expect(view.getByTestId ("toolbar-import-input"))
-                    .toHaveAttribute (
-                        "accept",
-                        ".png,.jpg,.jpeg,.gif,.webp,image/png,image/jpeg,image/gif,image/webp"
-                    )
+                    .toHaveAttribute ("accept", ".png,.jpg,.jpeg,.gif,.webp,image/png,image/jpeg,image/gif,image/webp")
 
                 Vitest.expect(view.getByTestId ("toolbar-export-1x")).toBeInTheDocument ()
                 Vitest.expect(view.getByTestId ("toolbar-export-2x")).toBeInTheDocument ()

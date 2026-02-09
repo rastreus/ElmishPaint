@@ -71,11 +71,10 @@ Vitest.describe (
         Vitest.test (
             "threshold and brightness adjustments change black pixel density",
             fun () ->
-                let scaledPixels =
-                    [|
-                        for index in 0 .. ((BitCanvas.Width * BitCanvas.Height) - 1) do
-                            if (index &&& 1) = 0 then 120.0 else 140.0
-                    |]
+                let scaledPixels = [|
+                    for index in 0 .. ((BitCanvas.Width * BitCanvas.Height) - 1) do
+                        if (index &&& 1) = 0 then 120.0 else 140.0
+                |]
 
                 let preview = ImageImport.buildPreview "levels.png" 0 0 scaledPixels
                 let thresholdPreview = ImageImport.withThreshold 16 preview

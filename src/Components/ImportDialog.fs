@@ -100,7 +100,7 @@ let ImportDialog (preview: ImportPreview) (dispatch: Msg -> unit) =
                                                 prop.value preview.ThresholdOffset
                                                 prop.className sliderClass
                                                 prop.onChange (fun ev ->
-                                                    dispatch (SetImportThreshold (parseSliderValue ev))
+                                                    dispatch (SetImportThreshold(parseSliderValue ev))
                                                 )
                                             ]
                                         ]
@@ -133,7 +133,7 @@ let ImportDialog (preview: ImportPreview) (dispatch: Msg -> unit) =
                                                 prop.value preview.Brightness
                                                 prop.className sliderClass
                                                 prop.onChange (fun ev ->
-                                                    dispatch (SetImportBrightness (parseSliderValue ev))
+                                                    dispatch (SetImportBrightness(parseSliderValue ev))
                                                 )
                                             ]
                                         ]

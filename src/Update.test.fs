@@ -67,7 +67,11 @@ let private importPreview fileName thresholdOffset brightness scaledPixels =
         scaledPixels
         |> Array.map (fun value ->
             let shifted = value + float brightness
-            if shifted < 0.0 then 0.0 elif shifted > 255.0 then 255.0 else shifted)
+
+            if shifted < 0.0 then 0.0
+            elif shifted > 255.0 then 255.0
+            else shifted
+        )
 
     {
         FileName = fileName
@@ -873,8 +877,9 @@ Vitest.describe (
                 let model = fst (Runtime.init ())
 
                 let scaledPixels =
-                    Array.init (BitCanvas.Width * BitCanvas.Height) (fun index ->
-                        if (index &&& 1) = 0 then 120.0 else 140.0)
+                    Array.init
+                        (BitCanvas.Width * BitCanvas.Height)
+                        (fun index -> if (index &&& 1) = 0 then 120.0 else 140.0)
 
                 let preview = importPreview "levels.png" 0 0 scaledPixels
                 let readyModel, _ = Runtime.update (ImportPreviewReady preview) model
@@ -885,6 +890,7 @@ Vitest.describe (
                     | None -> failwith "expected initial preview"
 
                 let thresholdModel, _ = Runtime.update (SetImportThreshold 16) readyModel
+
                 let thresholdCount =
                     match thresholdModel.ImportPreview with
                     | Some activePreview ->
@@ -893,6 +899,7 @@ Vitest.describe (
                     | None -> failwith "expected threshold preview"
 
                 let brightenedModel, _ = Runtime.update (SetImportBrightness 20) thresholdModel
+
                 let brightenedCount =
                     match brightenedModel.ImportPreview with
                     | Some activePreview ->
