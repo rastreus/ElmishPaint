@@ -4,6 +4,7 @@ import fable from 'vite-plugin-fable'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
+  base: '/ElmishPaint/',
   plugins: [
     fable({ fsproj: './src/ElmishPaint.fsproj', jsx: 'automatic' }),
     react(),
