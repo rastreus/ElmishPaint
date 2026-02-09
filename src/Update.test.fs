@@ -5,6 +5,13 @@ open App.Canvas
 open Elmish
 open Vitest
 
+let private noModifiers = {
+    Shift = false
+    Ctrl = false
+    Alt = false
+    Meta = false
+}
+
 Vitest.describe (
     "Runtime.init",
     fun () ->
@@ -61,5 +68,55 @@ Vitest.describe (
                 let invalidZoomModel, invalidZoomCmd = Runtime.update (SetZoom 3) zoomEightModel
                 Vitest.expect(invalidZoomModel.UI.Zoom).toBe (8)
                 Vitest.expect(invalidZoomCmd).toEqual (Cmd.none)
+        )
+
+        Vitest.test (
+            "pencil stroke started on white remains preview-only until mouse up then commits black line",
+            fun () ->
+                let model = fst (Runtime.init ())
+
+                let downModel, _ = Runtime.update (CanvasMouseDown({ X = 5; Y = 5 }, noModifiers)) model
+                let moveModel, _ = Runtime.update (CanvasMouseMove({ X = 7; Y = 5 }, noModifiers)) downModel
+
+                Vitest.expect(BitCanvas.getPixel 5 5 moveModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 6 5 moveModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 7 5 moveModel.Canvas).toEqual (White)
+
+                let upModel, _ = Runtime.update (CanvasMouseUp({ X = 7; Y = 5 }, noModifiers)) moveModel
+
+                Vitest.expect(BitCanvas.getPixel 5 5 upModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 6 5 upModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 7 5 upModel.Canvas).toEqual (Black)
+        )
+
+        Vitest.test (
+            "pencil polarity locks for entire stroke started on black",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 10 10 Black model.Canvas
+
+                let downModel, _ = Runtime.update (CanvasMouseDown({ X = 10; Y = 10 }, noModifiers)) model
+                let moveModel, _ = Runtime.update (CanvasMouseMove({ X = 12; Y = 10 }, noModifiers)) downModel
+
+                Vitest.expect(BitCanvas.getPixel 12 10 moveModel.Canvas).toEqual (White)
+
+                let upModel, _ = Runtime.update (CanvasMouseUp({ X = 12; Y = 10 }, noModifiers)) moveModel
+
+                Vitest.expect(BitCanvas.getPixel 10 10 upModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 11 10 upModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 12 10 upModel.Canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "pencil drag uses interpolation for gap-free diagonal lines",
+            fun () ->
+                let model = fst (Runtime.init ())
+
+                let downModel, _ = Runtime.update (CanvasMouseDown({ X = 0; Y = 0 }, noModifiers)) model
+                let moveModel, _ = Runtime.update (CanvasMouseMove({ X = 5; Y = 5 }, noModifiers)) downModel
+                let upModel, _ = Runtime.update (CanvasMouseUp({ X = 5; Y = 5 }, noModifiers)) moveModel
+
+                for i in 0 .. 5 do
+                    Vitest.expect(BitCanvas.getPixel i i upModel.Canvas).toEqual (Black)
         )
 )
