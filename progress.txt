@@ -84,3 +84,14 @@ Date: 2026-02-08T21:11:04Z
 - Updated `src/vitest-setup.ts` 2D canvas shim to record `stroke` calls so grid overlay drawing can be asserted in unit tests.
 - Applied Fantomas formatting for touched files.
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+## Iteration 9 — S08-pencil — Pencil tool with Bresenham line drawing
+Date: 2026-02-09T00:44:17Z
+- Added `src/Canvas/Algorithms.fs` with inclusive integer Bresenham interpolation and added known-input coverage in `src/Canvas/Algorithms.test.fs`.
+- Extended `MouseState` in `src/Types.fs` with transient `StrokeCanvas` and locked `StrokeBit` fields for in-progress stroke state.
+- Added `src/Tools/Pencil.fs` and rewired pencil handling in `src/Update.fs`: mouse-down locks polarity from the start pixel, mouse-move draws interpolated segments, mouse-up commits the stroke to `Model.Canvas`.
+- Updated `src/Components/CanvasView.fs` to render `Mouse.StrokeCanvas` while dragging so preview remains visible even though canonical canvas commit is on mouse-up.
+- Expanded `src/Update.test.fs` with pencil behavior tests for commit timing, polarity locking, and gap-free diagonal interpolation.
+- Updated `src/ElmishPaint.fsproj` compile order for `Canvas/Algorithms.fs`, `Tools/Pencil.fs`, and `Canvas/Algorithms.test.fs`.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Runtime verification note: `agent-browser` is blocked in this sandbox (`~/.agent-browser` socket dir not writable), so live browser error inspection could not run.
+- AGENTS.md updates made: none.

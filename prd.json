@@ -144,7 +144,7 @@
         "Vitest tests verify Bresenham produces correct pixels for known inputs",
         "Vitest tests verify pencil polarity locking"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S09-undo-redo",
