@@ -39,6 +39,30 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "shows keyboard shortcut tooltips for discoverability",
+            fun () ->
+                let view = RTL.render (Toolbar (defaultModel ()) ignore)
+
+                Vitest.expect(view.getByTestId ("toolbar-tool-pencil")).toHaveAttribute ("title", "Pencil (P)")
+                Vitest.expect(view.getByTestId ("toolbar-tool-eraser")).toHaveAttribute ("title", "Eraser (E)")
+                Vitest.expect(view.getByTestId ("toolbar-tool-line")).toHaveAttribute ("title", "Line (L)")
+                Vitest.expect(view.getByTestId ("toolbar-tool-rectangle")).toHaveAttribute ("title", "Rect (R)")
+                Vitest.expect(view.getByTestId ("toolbar-tool-flood-fill")).toHaveAttribute ("title", "Fill Area (F)")
+                Vitest.expect(view.getByTestId ("toolbar-tool-marquee")).toHaveAttribute ("title", "Marquee (M)")
+
+                Vitest.expect(view.getByTestId ("toolbar-zoom-1")).toHaveAttribute ("title", "Zoom 1x (1)")
+                Vitest.expect(view.getByTestId ("toolbar-zoom-2")).toHaveAttribute ("title", "Zoom 2x (2)")
+                Vitest.expect(view.getByTestId ("toolbar-zoom-4")).toHaveAttribute ("title", "Zoom 4x (3)")
+                Vitest.expect(view.getByTestId ("toolbar-zoom-8")).toHaveAttribute ("title", "Zoom 8x (4)")
+
+                Vitest.expect(view.getByTestId ("toolbar-undo")).toHaveAttribute ("title", "Undo (Ctrl/Cmd+Z)")
+                Vitest.expect(view.getByTestId ("toolbar-redo")).toHaveAttribute ("title", "Redo (Ctrl/Cmd+Shift+Z)")
+                Vitest.expect(view.getByTestId ("toolbar-import-button")).toHaveAttribute ("title", "Import (Ctrl/Cmd+I)")
+                Vitest.expect(view.getByTestId ("toolbar-export-1x")).toHaveAttribute ("title", "Export 1x (Ctrl/Cmd+S)")
+                Vitest.expect(view.getByTestId ("toolbar-export-2x")).toHaveAttribute ("title", "Export 2x (Ctrl/Cmd+Shift+S)")
+        )
+
+        Vitest.test (
             "shows eraser brush controls only when eraser tool is active",
             fun () ->
                 let pencilView = RTL.render (Toolbar (defaultModel ()) ignore)
