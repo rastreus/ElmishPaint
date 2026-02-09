@@ -9,20 +9,6 @@ module FloodFill =
     let private inBounds x y =
         x >= 0 && x < BitCanvas.Width && y >= 0 && y < BitCanvas.Height
 
-    let private samplePattern pattern x y =
-        let patternId = pattern.Id.ToLowerInvariant()
-
-        if patternId = "solid-white" then
-            White
-        elif
-            patternId = "checkerboard-50"
-            || patternId = "dither-50"
-            || patternId.Contains("checker")
-        then
-            if ((x + y) &&& 1) = 0 then Black else White
-        else
-            Black
-
     let fill startPoint pattern canvas : App.BitCanvas =
         let filledCanvas = BitCanvas.clone canvas
 
@@ -45,7 +31,7 @@ module FloodFill =
                         visited[index] <- true
 
                         if BitCanvas.getPixel point.X point.Y canvas = targetBit then
-                            BitCanvas.setPixel point.X point.Y (samplePattern pattern point.X point.Y) filledCanvas
+                            BitCanvas.setPixel point.X point.Y (Patterns.sampleBit pattern point.X point.Y) filledCanvas
                             stack.Push({ X = point.X + 1; Y = point.Y })
                             stack.Push({ X = point.X - 1; Y = point.Y })
                             stack.Push({ X = point.X; Y = point.Y + 1 })

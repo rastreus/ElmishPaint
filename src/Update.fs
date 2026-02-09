@@ -12,11 +12,7 @@ module Runtime =
         Meta = false
     }
 
-    let private defaultPattern = {
-        Id = "solid-black"
-        Name = "Solid Black"
-        Tile = Unchecked.defaultof<bool array array>
-    }
+    let private defaultPattern = Patterns.solidBlack
 
     let init () : Model * Cmd<Msg> =
         {

@@ -12,20 +12,6 @@ module Rectangle =
         let bottom = max startPoint.Y endPoint.Y
         left, top, right, bottom
 
-    let private samplePattern pattern x y =
-        let patternId = pattern.Id.ToLowerInvariant()
-
-        if patternId = "solid-white" then
-            White
-        elif
-            patternId = "checkerboard-50"
-            || patternId = "dither-50"
-            || patternId.Contains("checker")
-        then
-            if ((x + y) &&& 1) = 0 then Black else White
-        else
-            Black
-
     let private drawOutline startPoint endPoint targetCanvas =
         let left, top, right, bottom = normalizedBounds startPoint endPoint
 
@@ -39,7 +25,7 @@ module Rectangle =
 
         for y in top..bottom do
             for x in left..right do
-                BitCanvas.setPixel x y (samplePattern pattern x y) targetCanvas
+                BitCanvas.setPixel x y (Patterns.sampleBit pattern x y) targetCanvas
 
     let buildOutlinePreview startPoint endPoint canvas : App.BitCanvas =
         let previewCanvas = BitCanvas.clone canvas

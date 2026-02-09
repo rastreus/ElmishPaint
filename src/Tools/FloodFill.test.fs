@@ -6,11 +6,7 @@ open Vitest
 
 let private blankCanvas () = BitCanvas.create ()
 
-let private patternWithId id = {
-    Id = id
-    Name = id
-    Tile = Unchecked.defaultof<bool array array>
-}
+let private patternWithId id = Patterns.fromId id
 
 let private drawBoxBorder left top right bottom canvas =
     for x in left..right do

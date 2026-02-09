@@ -37,11 +37,7 @@ let private selectFilledRectangle model =
 let private selectFloodFill model =
     Runtime.update (SelectTool FloodFill) model |> fst
 
-let private patternWithId id = {
-    Id = id
-    Name = id
-    Tile = Unchecked.defaultof<bool array array>
-}
+let private patternWithId id = Patterns.fromId id
 
 let private countBlackPixels y canvas =
     [ 0 .. (BitCanvas.Width - 1) ]
