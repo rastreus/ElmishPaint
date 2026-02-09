@@ -37,6 +37,9 @@ let private selectFilledRectangle model =
 let private selectFloodFill model =
     Runtime.update (SelectTool FloodFill) model |> fst
 
+let private selectMarquee model =
+    Runtime.update (SelectTool Marquee) model |> fst
+
 let private patternWithId id = Patterns.fromId id
 
 let private selectPattern patternId model =
@@ -455,6 +458,168 @@ Vitest.describe (
                 Vitest.expect(BitCanvas.getPixel 1 0 filledModel.Canvas).toEqual (White)
                 Vitest.expect(BitCanvas.getPixel 0 1 filledModel.Canvas).toEqual (White)
                 Vitest.expect(BitCanvas.getPixel 1 1 filledModel.Canvas).toEqual (Black)
+        )
+
+        Vitest.test (
+            "marquee drag lifts selected pixels and clears source region",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 10 10 Black model.Canvas
+                let marqueeModel = selectMarquee model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 10; Y = 10 }, noModifiers)) marqueeModel
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 10; Y = 10 }, noModifiers)) downModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 10; Y = 10 }, noModifiers)) moveModel
+
+                Vitest.expect(BitCanvas.getPixel 10 10 upModel.Canvas).toEqual (White)
+                Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
+
+                match upModel.Selection with
+                | Some selection ->
+                    Vitest.expect(selection.Offset).toEqual ({ X = 0; Y = 0 })
+
+                    match selection.FloatingPixels with
+                    | Some floatingPixels ->
+                        Vitest.expect(BitCanvas.getPixel 10 10 floatingPixels).toEqual (Black)
+                    | None -> failwith "expected floating marquee pixels"
+                | None -> failwith "expected active marquee selection"
+        )
+
+        Vitest.test (
+            "MoveSelection shifts marquee offset by one pixel per message",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 12 12 Black model.Canvas
+                let marqueeModel = selectMarquee model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 12; Y = 12 }, noModifiers)) marqueeModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 12; Y = 12 }, noModifiers)) downModel
+
+                let movedModel, _ = Runtime.update (MoveSelection { X = 1; Y = 0 }) upModel
+
+                match movedModel.Selection with
+                | Some selection -> Vitest.expect(selection.Offset).toEqual ({ X = 1; Y = 0 })
+                | None -> failwith "expected moved marquee selection"
+        )
+
+        Vitest.test (
+            "StampSelection merges floating pixels at moved offset and clears active selection",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 16 16 Black model.Canvas
+                let marqueeModel = selectMarquee model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 16; Y = 16 }, noModifiers)) marqueeModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 16; Y = 16 }, noModifiers)) downModel
+
+                let movedModel, _ = Runtime.update (MoveSelection { X = 1; Y = 0 }) upModel
+                let stampedModel, _ = Runtime.update StampSelection movedModel
+
+                Vitest.expect(stampedModel.Selection).toEqual (None)
+                Vitest.expect(BitCanvas.getPixel 16 16 stampedModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 17 16 stampedModel.Canvas).toEqual (Black)
+        )
+
+        Vitest.test (
+            "clicking outside marquee stamps and clears selection",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 20 20 Black model.Canvas
+                let marqueeModel = selectMarquee model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 20; Y = 20 }, noModifiers)) marqueeModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 20; Y = 20 }, noModifiers)) downModel
+
+                let movedModel, _ = Runtime.update (MoveSelection { X = 2; Y = 0 }) upModel
+
+                let stampedByClickModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 100; Y = 100 }, noModifiers)) movedModel
+
+                Vitest.expect(stampedByClickModel.Selection).toEqual (None)
+                Vitest.expect(stampedByClickModel.Mouse.IsDown).toBe (false)
+                Vitest.expect(BitCanvas.getPixel 22 20 stampedByClickModel.Canvas).toEqual (Black)
+        )
+
+        Vitest.test (
+            "escape cancels marquee move and stamps at original position",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 24 24 Black model.Canvas
+                let marqueeModel = selectMarquee model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 24; Y = 24 }, noModifiers)) marqueeModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 24; Y = 24 }, noModifiers)) downModel
+
+                let movedModel, _ = Runtime.update (MoveSelection { X = 3; Y = 0 }) upModel
+
+                let escapedModel, _ = Runtime.update (KeyDown("Escape", noModifiers)) movedModel
+
+                Vitest.expect(escapedModel.Selection).toEqual (None)
+                Vitest.expect(BitCanvas.getPixel 24 24 escapedModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 27 24 escapedModel.Canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "delete clears lifted marquee without stamping moved pixels",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 28 28 Black model.Canvas
+                let marqueeModel = selectMarquee model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 28; Y = 28 }, noModifiers)) marqueeModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 28; Y = 28 }, noModifiers)) downModel
+
+                let movedModel, _ = Runtime.update (MoveSelection { X = 4; Y = 0 }) upModel
+                let clearedModel, _ = Runtime.update (KeyDown("Delete", noModifiers)) movedModel
+
+                Vitest.expect(clearedModel.Selection).toEqual (None)
+                Vitest.expect(BitCanvas.getPixel 28 28 clearedModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 32 28 clearedModel.Canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "full marquee select move stamp cycle uses one undo entry",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 40 40 Black model.Canvas
+                let marqueeModel = selectMarquee model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 40; Y = 40 }, noModifiers)) marqueeModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 40; Y = 40 }, noModifiers)) downModel
+
+                let movedModel, _ = Runtime.update (MoveSelection { X = 1; Y = 0 }) upModel
+                let stampedModel, _ = Runtime.update StampSelection movedModel
+
+                Vitest.expect(List.length stampedModel.History.UndoStack).toBe (1)
+                Vitest.expect(BitCanvas.getPixel 41 40 stampedModel.Canvas).toEqual (Black)
+
+                let undoneModel, _ = Runtime.update Undo stampedModel
+
+                Vitest.expect(BitCanvas.getPixel 40 40 undoneModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 41 40 undoneModel.Canvas).toEqual (White)
         )
 
         Vitest.test (
