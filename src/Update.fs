@@ -336,7 +336,9 @@ module Runtime =
                 Cmd.none
             | None -> model, Cmd.none
         | CancelImport -> { model with ImportPreview = None }, Cmd.none
-        | ExportPNG _ -> model, Cmd.none
+        | ExportPNG scale ->
+            let snapshot = BitCanvas.clone model.Canvas
+            model, Cmd.ofEffect (fun _ -> ImageExport.exportPng scale snapshot)
         | SetZoom zoom ->
             if isSupportedZoom zoom then
                 {

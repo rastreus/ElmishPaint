@@ -208,13 +208,19 @@ Vitest.describe (
                 Vitest.expect(BitCanvas.getPixel 31 10 undoneModel.Canvas).toEqual (White)
                 Vitest.expect(BitCanvas.getPixel 31 10 redoneModel.Canvas).toEqual (Black)
 
-                let exportOneShortcutResult = Runtime.update (KeyDown("s", primaryModifiers)) model
+                let exportOneShortcutModel, exportOneShortcutCmd =
+                    Runtime.update (KeyDown("s", primaryModifiers)) model
 
-                let exportTwoShortcutResult =
+                let exportTwoShortcutModel, exportTwoShortcutCmd =
                     Runtime.update (KeyDown("s", primaryShiftModifiers)) model
 
-                Vitest.expect(exportOneShortcutResult).toEqual (Runtime.update (ExportPNG Scale1x) model)
-                Vitest.expect(exportTwoShortcutResult).toEqual (Runtime.update (ExportPNG Scale2x) model)
+                let directExportOneModel, _ = Runtime.update (ExportPNG Scale1x) model
+                let directExportTwoModel, _ = Runtime.update (ExportPNG Scale2x) model
+
+                Vitest.expect(exportOneShortcutModel).toEqual (directExportOneModel)
+                Vitest.expect(exportTwoShortcutModel).toEqual (directExportTwoModel)
+                Vitest.expect(List.length exportOneShortcutCmd).toBe (1)
+                Vitest.expect(List.length exportTwoShortcutCmd).toBe (1)
         )
 
         Vitest.test (

@@ -12,6 +12,7 @@
         <Compile Include="Canvas/BitCanvas.fs" />
         <Compile Include="Canvas/Dithering.fs" />
         <Compile Include="Canvas/ImageImport.fs" />
+        <Compile Include="Canvas/ImageExport.fs" />
         <Compile Include="Canvas/Patterns.fs" />
         <Compile Include="History.fs" />
         <Compile Include="Tools/Pencil.fs" />
