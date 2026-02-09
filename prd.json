@@ -272,7 +272,7 @@
         "Full select-move-stamp is one undo entry",
         "Marching ants animate smoothly"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S17-toolbar",

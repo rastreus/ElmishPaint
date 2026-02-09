@@ -165,3 +165,14 @@ Date: 2026-02-09T02:29:49Z
 - Updated `src/ElmishPaint.fsproj` compile order for `Components/PatternPalette.fs` and `Components/PatternPalette.test.fs`.
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: none.
+## Iteration 17 — S16-marquee — Marquee selection: select, move, stamp
+Date: 2026-02-09T02:50:58Z
+- Added `src/Tools/Marquee.fs` with pure marquee operations: bounds normalization, lift (cut to floating pixels + clear source), offset movement, composition/stamp with clipping, point-hit testing, and escape-cancel stamping to origin.
+- Integrated marquee lifecycle into `src/Update.fs`: drag-to-lift on mouse up, one-time history push at lift, `MoveSelection`, `StampSelection`, `ClearSelection`, outside-click stamp, and marquee `KeyDown` handling for arrows/Escape/Delete/Backspace.
+- Updated `src/Components/CanvasView.fs` to render composed floating selection pixels and draw animated marching-ants borders during marquee drag/active selection.
+- Extended browser canvas mocks in `src/vitest-setup.ts` to support marquee rendering assertions (`setLineDash`, `strokeRect`, dash offsets).
+- Added marquee-focused tests: `src/Tools/Marquee.test.fs`, new marquee lifecycle coverage in `src/Update.test.fs`, and marching-ants/composition coverage in `src/Components/CanvasView.test.fs`.
+- Updated `src/ElmishPaint.fsproj` compile order for `Tools/Marquee.fs` and `Tools/Marquee.test.fs`; applied Fantomas formatting to touched F# files.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Runtime verification note: `agent-browser` remains unavailable in this sandbox per established AGENTS.md discovered pattern.
+- AGENTS.md updates made: none.
