@@ -155,3 +155,13 @@ Date: 2026-02-09T02:17:32Z
 - Updated `src/ElmishPaint.fsproj` compile order for new `Patterns` source/test modules.
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: none.
+## Iteration 16 — S15-pattern-palette — Pattern palette UI component
+Date: 2026-02-09T02:29:49Z
+- Implemented `src/Components/PatternPalette.fs` as a swatch grid driven by `Patterns.all`; each swatch renders an 8x8 tile preview and dispatches `SelectPattern` on click.
+- Added active-swatch visual highlight (`ring-2`/dark border) and wired palette into `src/App.fs` with an `active-pattern` status readout.
+- Implemented `SelectPattern` handling in `src/Update.fs` so pattern selection updates `Model.Pattern`.
+- Added palette coverage in `src/Components/PatternPalette.test.fs` (all swatches rendered, active highlight, click dispatch) and app integration coverage in `src/App.test.fs` (click swatch updates rendered active pattern).
+- Updated `src/Update.test.fs` pattern-dependent tool tests to select patterns via the `SelectPattern` message before filled-rectangle and flood-fill actions.
+- Updated `src/ElmishPaint.fsproj` compile order for `Components/PatternPalette.fs` and `Components/PatternPalette.test.fs`.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.

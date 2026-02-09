@@ -253,7 +253,7 @@
         "Clicking a swatch dispatches SelectPattern and updates model",
         "Filled rectangle and flood fill use the selected pattern"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S16-marquee",
