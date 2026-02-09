@@ -39,6 +39,9 @@ let private selectFloodFill model =
 
 let private patternWithId id = Patterns.fromId id
 
+let private selectPattern patternId model =
+    Runtime.update (SelectPattern(patternWithId patternId)) model |> fst
+
 let private countBlackPixels y canvas =
     [ 0 .. (BitCanvas.Width - 1) ]
     |> List.filter (fun x -> BitCanvas.getPixel x y canvas = Black)
@@ -388,12 +391,7 @@ Vitest.describe (
             "filled rectangle commits checkerboard fill on mouse up as a single undo entry",
             fun () ->
                 let model = fst (Runtime.init ())
-
-                let patternedModel = {
-                    model with
-                        Pattern = patternWithId "checkerboard-50"
-                }
-
+                let patternedModel = selectPattern "checkerboard-50" model
                 let filledRectangleModel = selectFilledRectangle patternedModel
 
                 let downModel, _ =
@@ -447,12 +445,7 @@ Vitest.describe (
             "flood fill uses selected pattern sampling",
             fun () ->
                 let model = fst (Runtime.init ())
-
-                let patternedModel = {
-                    model with
-                        Pattern = patternWithId "checkerboard-50"
-                }
-
+                let patternedModel = selectPattern "checkerboard-50" model
                 let floodFillModel = selectFloodFill patternedModel
 
                 let filledModel, _ =
