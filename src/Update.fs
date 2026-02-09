@@ -34,6 +34,7 @@ module Runtime =
                 Current = None
                 StrokeCanvas = None
                 StrokeBit = None
+                StrokeBrushSize = None
                 Modifiers = defaultModifiers
             }
             Selection = None
@@ -66,12 +67,16 @@ module Runtime =
             Cmd.none
         | SelectPattern _ -> model, Cmd.none
         | CanvasMouseDown(position, modifiers) ->
-            let strokeCanvas, strokeBit =
-                if model.Tool = Pencil then
+            let strokeCanvas, strokeBit, strokeBrushSize =
+                match model.Tool with
+                | Pencil ->
                     let nextStrokeCanvas, nextStrokeBit = Pencil.beginStroke position model.Canvas
-                    Some nextStrokeCanvas, Some nextStrokeBit
-                else
-                    None, None
+                    Some nextStrokeCanvas, Some nextStrokeBit, None
+                | Eraser ->
+                    let brushSize = model.ToolOptions.EraserBrushSize
+                    let nextStrokeCanvas = Eraser.beginStroke position brushSize model.Canvas
+                    Some nextStrokeCanvas, None, Some brushSize
+                | _ -> None, None, None
 
             let nextMouse = {
                 IsDown = true
@@ -80,20 +85,30 @@ module Runtime =
                 Current = Some position
                 StrokeCanvas = strokeCanvas
                 StrokeBit = strokeBit
+                StrokeBrushSize = strokeBrushSize
                 Modifiers = modifiers
             }
 
             { model with Mouse = nextMouse }, Cmd.none
         | CanvasMouseMove(position, modifiers) ->
-            let nextStrokeCanvas, nextStrokeBit =
-                if model.Mouse.IsDown && model.Tool = Pencil then
-                    match model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.Current with
-                    | Some strokeCanvas, Some strokeBit, Some current ->
-                        Pencil.drawSegment strokeBit current position strokeCanvas
-                        Some strokeCanvas, Some strokeBit
-                    | _ -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit
+            let nextStrokeCanvas, nextStrokeBit, nextStrokeBrushSize =
+                if model.Mouse.IsDown then
+                    match model.Tool with
+                    | Pencil ->
+                        match model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.Current with
+                        | Some strokeCanvas, Some strokeBit, Some current ->
+                            Pencil.drawSegment strokeBit current position strokeCanvas
+                            Some strokeCanvas, Some strokeBit, model.Mouse.StrokeBrushSize
+                        | _ -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
+                    | Eraser ->
+                        match model.Mouse.StrokeCanvas, model.Mouse.StrokeBrushSize, model.Mouse.Current with
+                        | Some strokeCanvas, Some strokeBrushSize, Some current ->
+                            Eraser.drawSegment current position strokeBrushSize strokeCanvas
+                            Some strokeCanvas, model.Mouse.StrokeBit, Some strokeBrushSize
+                        | _ -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
+                    | _ -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
                 else
-                    model.Mouse.StrokeCanvas, model.Mouse.StrokeBit
+                    model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
 
             let nextMouse = {
                 model.Mouse with
@@ -101,20 +116,33 @@ module Runtime =
                     Current = Some position
                     StrokeCanvas = nextStrokeCanvas
                     StrokeBit = nextStrokeBit
+                    StrokeBrushSize = nextStrokeBrushSize
                     Modifiers = modifiers
             }
 
             { model with Mouse = nextMouse }, Cmd.none
         | CanvasMouseUp(position, modifiers) ->
             let committedCanvas, nextHistory =
-                if model.Mouse.IsDown && model.Tool = Pencil then
-                    match model.Mouse.StrokeCanvas, model.Mouse.StrokeBit with
-                    | Some strokeCanvas, Some strokeBit ->
-                        match model.Mouse.Current with
-                        | Some current -> Pencil.drawSegment strokeBit current position strokeCanvas
-                        | None -> ()
+                if model.Mouse.IsDown then
+                    match model.Tool with
+                    | Pencil ->
+                        match model.Mouse.StrokeCanvas, model.Mouse.StrokeBit with
+                        | Some strokeCanvas, Some strokeBit ->
+                            match model.Mouse.Current with
+                            | Some current -> Pencil.drawSegment strokeBit current position strokeCanvas
+                            | None -> ()
 
-                        strokeCanvas, History.push model.Canvas model.History
+                            strokeCanvas, History.push model.Canvas model.History
+                        | _ -> model.Canvas, model.History
+                    | Eraser ->
+                        match model.Mouse.StrokeCanvas, model.Mouse.StrokeBrushSize with
+                        | Some strokeCanvas, Some strokeBrushSize ->
+                            match model.Mouse.Current with
+                            | Some current -> Eraser.drawSegment current position strokeBrushSize strokeCanvas
+                            | None -> ()
+
+                            strokeCanvas, History.push model.Canvas model.History
+                        | _ -> model.Canvas, model.History
                     | _ -> model.Canvas, model.History
                 else
                     model.Canvas, model.History
@@ -127,6 +155,7 @@ module Runtime =
                     Start = None
                     StrokeCanvas = None
                     StrokeBit = None
+                    StrokeBrushSize = None
                     Modifiers = modifiers
             }
 

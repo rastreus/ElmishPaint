@@ -58,6 +58,7 @@ type MouseState = {
     Current: Point option
     StrokeCanvas: BitCanvas option
     StrokeBit: Bit option
+    StrokeBrushSize: BrushSize option
     Modifiers: Modifiers
 }
 
