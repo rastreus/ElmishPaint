@@ -131,8 +131,24 @@ module Runtime =
                     Mouse = nextMouse
             },
             Cmd.none
-        | Undo -> model, Cmd.none
-        | Redo -> model, Cmd.none
+        | Undo ->
+            let nextCanvas, nextHistory = History.undo model.Canvas model.History
+
+            {
+                model with
+                    Canvas = nextCanvas
+                    History = nextHistory
+            },
+            Cmd.none
+        | Redo ->
+            let nextCanvas, nextHistory = History.redo model.Canvas model.History
+
+            {
+                model with
+                    Canvas = nextCanvas
+                    History = nextHistory
+            },
+            Cmd.none
         | ClearSelection -> model, Cmd.none
         | MoveSelection _ -> model, Cmd.none
         | StampSelection -> model, Cmd.none
