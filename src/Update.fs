@@ -82,6 +82,14 @@ module Runtime =
                 | Line ->
                     let nextStrokeCanvas = Line.buildPreview position position model.Canvas
                     Some nextStrokeCanvas, None, None
+                | Rectangle ->
+                    let nextStrokeCanvas = Rectangle.buildOutlinePreview position position model.Canvas
+                    Some nextStrokeCanvas, None, None
+                | FilledRectangle ->
+                    let nextStrokeCanvas =
+                        Rectangle.buildFilledPreview position position model.Pattern model.Canvas
+
+                    Some nextStrokeCanvas, None, None
                 | _ -> None, None, None
 
             let nextMouse = {
@@ -116,6 +124,22 @@ module Runtime =
                         match model.Mouse.Start with
                         | Some start ->
                             let previewCanvas = Line.buildPreview start position model.Canvas
+                            Some previewCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
+                        | None -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
+                    | Rectangle ->
+                        match model.Mouse.Start with
+                        | Some start ->
+                            let previewCanvas =
+                                Rectangle.buildOutlinePreview start position model.Canvas
+
+                            Some previewCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
+                        | None -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
+                    | FilledRectangle ->
+                        match model.Mouse.Start with
+                        | Some start ->
+                            let previewCanvas =
+                                Rectangle.buildFilledPreview start position model.Pattern model.Canvas
+
                             Some previewCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
                         | None -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
                     | _ -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
@@ -159,6 +183,22 @@ module Runtime =
                         match model.Mouse.Start with
                         | Some start ->
                             let committedCanvas = Line.commit start position model.Canvas
+                            committedCanvas, History.push model.Canvas model.History
+                        | None -> model.Canvas, model.History
+                    | Rectangle ->
+                        match model.Mouse.Start with
+                        | Some start ->
+                            let committedCanvas =
+                                Rectangle.commitOutline start position model.Canvas
+
+                            committedCanvas, History.push model.Canvas model.History
+                        | None -> model.Canvas, model.History
+                    | FilledRectangle ->
+                        match model.Mouse.Start with
+                        | Some start ->
+                            let committedCanvas =
+                                Rectangle.commitFilled start position model.Pattern model.Canvas
+
                             committedCanvas, History.push model.Canvas model.History
                         | None -> model.Canvas, model.History
                     | _ -> model.Canvas, model.History
