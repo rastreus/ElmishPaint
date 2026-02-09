@@ -54,7 +54,9 @@ module Marquee =
     }
 
     let boundsWithOffset selection =
-        let left, top, right, bottom = normalizeBounds selection.BoundsStart selection.BoundsEnd
+        let left, top, right, bottom =
+            normalizeBounds selection.BoundsStart selection.BoundsEnd
+
         left + selection.Offset.X, top + selection.Offset.Y, right + selection.Offset.X, bottom + selection.Offset.Y
 
     let containsPoint point selection =
@@ -66,13 +68,28 @@ module Marquee =
         | None -> BitCanvas.clone baseCanvas
         | Some floatingPixels ->
             let composedCanvas = BitCanvas.clone baseCanvas
-            let left, top, right, bottom = normalizeBounds selection.BoundsStart selection.BoundsEnd
 
-            drawSelectionPixels left top right bottom selection.Offset.X selection.Offset.Y floatingPixels composedCanvas
+            let left, top, right, bottom =
+                normalizeBounds selection.BoundsStart selection.BoundsEnd
+
+            drawSelectionPixels
+                left
+                top
+                right
+                bottom
+                selection.Offset.X
+                selection.Offset.Y
+                floatingPixels
+                composedCanvas
+
             composedCanvas
 
     let stamp selection baseCanvas : App.BitCanvas = compose selection baseCanvas
 
     let cancel selection baseCanvas : App.BitCanvas =
-        let resetSelection = { selection with Offset = { X = 0; Y = 0 } }
+        let resetSelection = {
+            selection with
+                Offset = { X = 0; Y = 0 }
+        }
+
         stamp resetSelection baseCanvas

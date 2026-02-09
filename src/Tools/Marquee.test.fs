@@ -19,8 +19,7 @@ Vitest.describe (
         Vitest.test (
             "lift captures selection pixels and clears source region",
             fun () ->
-                let canvas =
-                    createCanvasWithPixels [ (1, 1, Black); (2, 2, Black); (4, 4, Black) ]
+                let canvas = createCanvasWithPixels [ (1, 1, Black); (2, 2, Black); (4, 4, Black) ]
 
                 let selection, liftedCanvas = Marquee.lift { X = 1; Y = 1 } { X = 2; Y = 2 } canvas
 
@@ -81,7 +80,10 @@ Vitest.describe (
             "cancel restores original placement regardless of moved offset",
             fun () ->
                 let canvas = createCanvasWithPixels [ (20, 20, Black) ]
-                let selection, liftedCanvas = Marquee.lift { X = 20; Y = 20 } { X = 20; Y = 20 } canvas
+
+                let selection, liftedCanvas =
+                    Marquee.lift { X = 20; Y = 20 } { X = 20; Y = 20 } canvas
+
                 let movedSelection = Marquee.move { X = 5; Y = 0 } selection
                 let cancelledCanvas = Marquee.cancel movedSelection liftedCanvas
 

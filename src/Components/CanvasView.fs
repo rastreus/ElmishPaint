@@ -111,7 +111,9 @@ let CanvasView (model: Model) (dispatch: Msg -> unit) =
 
     React.useEffect (
         (fun () ->
-            let intervalId = window.setTimeout ((fun () -> setAntsPhase ((antsPhase + 1) % 8)), 120)
+            let intervalId =
+                window.setTimeout ((fun () -> setAntsPhase ((antsPhase + 1) % 8)), 120)
+
             fun () -> window.clearTimeout intervalId
         ),
         [| box antsPhase |]

@@ -46,6 +46,7 @@ let private selectMarquee model =
 
 let private liftSinglePixelSelection x y model =
     let marqueeModel = selectMarquee model
+
     let modifiers = {
         Shift = false
         Ctrl = false
@@ -53,7 +54,9 @@ let private liftSinglePixelSelection x y model =
         Meta = false
     }
 
-    let downModel, _ = Runtime.update (CanvasMouseDown({ X = x; Y = y }, modifiers)) marqueeModel
+    let downModel, _ =
+        Runtime.update (CanvasMouseDown({ X = x; Y = y }, modifiers)) marqueeModel
+
     Runtime.update (CanvasMouseUp({ X = x; Y = y }, modifiers)) downModel |> fst
 
 Vitest.describe (
@@ -210,6 +213,7 @@ Vitest.describe (
             fun () ->
                 let model = defaultModel ()
                 let marqueeModel = selectMarquee model
+
                 let modifiers = {
                     Shift = false
                     Ctrl = false
@@ -217,8 +221,11 @@ Vitest.describe (
                     Meta = false
                 }
 
-                let downModel, _ = Runtime.update (CanvasMouseDown({ X = 5; Y = 5 }, modifiers)) marqueeModel
-                let dragModel, _ = Runtime.update (CanvasMouseMove({ X = 8; Y = 8 }, modifiers)) downModel
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 5; Y = 5 }, modifiers)) marqueeModel
+
+                let dragModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 8; Y = 8 }, modifiers)) downModel
 
                 let view = RTL.render (CanvasView dragModel ignore)
                 let canvas = view.getByTestId ("paint-canvas") :?> HTMLCanvasElement

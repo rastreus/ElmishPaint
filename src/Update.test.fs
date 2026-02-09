@@ -484,8 +484,7 @@ Vitest.describe (
                     Vitest.expect(selection.Offset).toEqual ({ X = 0; Y = 0 })
 
                     match selection.FloatingPixels with
-                    | Some floatingPixels ->
-                        Vitest.expect(BitCanvas.getPixel 10 10 floatingPixels).toEqual (Black)
+                    | Some floatingPixels -> Vitest.expect(BitCanvas.getPixel 10 10 floatingPixels).toEqual (Black)
                     | None -> failwith "expected floating marquee pixels"
                 | None -> failwith "expected active marquee selection"
         )

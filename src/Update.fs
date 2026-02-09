@@ -269,7 +269,12 @@ module Runtime =
             match model.Selection with
             | Some selection when selection.FloatingPixels.IsSome ->
                 let movedSelection = Marquee.move delta selection
-                { model with Selection = Some movedSelection }, Cmd.none
+
+                {
+                    model with
+                        Selection = Some movedSelection
+                },
+                Cmd.none
             | _ -> model, Cmd.none
         | StampSelection ->
             match model.Selection with
@@ -304,16 +309,36 @@ module Runtime =
                 match key with
                 | "ArrowUp" ->
                     let movedSelection = Marquee.move { X = 0; Y = -1 } selection
-                    { model with Selection = Some movedSelection }, Cmd.none
+
+                    {
+                        model with
+                            Selection = Some movedSelection
+                    },
+                    Cmd.none
                 | "ArrowDown" ->
                     let movedSelection = Marquee.move { X = 0; Y = 1 } selection
-                    { model with Selection = Some movedSelection }, Cmd.none
+
+                    {
+                        model with
+                            Selection = Some movedSelection
+                    },
+                    Cmd.none
                 | "ArrowLeft" ->
                     let movedSelection = Marquee.move { X = -1; Y = 0 } selection
-                    { model with Selection = Some movedSelection }, Cmd.none
+
+                    {
+                        model with
+                            Selection = Some movedSelection
+                    },
+                    Cmd.none
                 | "ArrowRight" ->
                     let movedSelection = Marquee.move { X = 1; Y = 0 } selection
-                    { model with Selection = Some movedSelection }, Cmd.none
+
+                    {
+                        model with
+                            Selection = Some movedSelection
+                    },
+                    Cmd.none
                 | "Escape" ->
                     let cancelledCanvas = Marquee.cancel selection model.Canvas
 
