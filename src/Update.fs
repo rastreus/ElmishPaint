@@ -2,6 +2,7 @@ namespace App
 
 open Elmish
 open App.Canvas
+open App.Tools
 
 module Runtime =
     let private defaultModifiers = {
@@ -51,11 +52,6 @@ module Runtime =
         },
         Cmd.none
 
-    let private drawPixelAt point canvas =
-        let nextCanvas = BitCanvas.clone canvas
-        BitCanvas.setPixel point.X point.Y Black nextCanvas
-        nextCanvas
-
     let private isSupportedZoom zoom =
         zoom = 1 || zoom = 2 || zoom = 4 || zoom = 8
 
@@ -64,59 +60,78 @@ module Runtime =
         | SelectTool tool -> { model with Tool = tool }, Cmd.none
         | SelectPattern _ -> model, Cmd.none
         | CanvasMouseDown(position, modifiers) ->
-            let nextCanvas =
+            let strokeCanvas, strokeBit =
                 if model.Tool = Pencil then
-                    drawPixelAt position model.Canvas
+                    let nextStrokeCanvas, nextStrokeBit = Pencil.beginStroke position model.Canvas
+                    Some nextStrokeCanvas, Some nextStrokeBit
                 else
-                    model.Canvas
+                    None, None
 
             let nextMouse = {
                 IsDown = true
                 Start = Some position
                 Last = Some position
                 Current = Some position
-                StrokeCanvas = None
-                StrokeBit = None
+                StrokeCanvas = strokeCanvas
+                StrokeBit = strokeBit
                 Modifiers = modifiers
             }
 
-            {
-                model with
-                    Canvas = nextCanvas
-                    Mouse = nextMouse
-            },
+            { model with Mouse = nextMouse },
             Cmd.none
         | CanvasMouseMove(position, modifiers) ->
-            let nextCanvas =
+            let nextStrokeCanvas, nextStrokeBit =
                 if model.Mouse.IsDown && model.Tool = Pencil then
-                    drawPixelAt position model.Canvas
+                    match model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.Current with
+                    | Some strokeCanvas, Some strokeBit, Some current ->
+                        Pencil.drawSegment strokeBit current position strokeCanvas
+                        Some strokeCanvas, Some strokeBit
+                    | _ -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit
                 else
-                    model.Canvas
+                    model.Mouse.StrokeCanvas, model.Mouse.StrokeBit
 
             let nextMouse = {
                 model.Mouse with
                     Last = model.Mouse.Current
                     Current = Some position
+                    StrokeCanvas = nextStrokeCanvas
+                    StrokeBit = nextStrokeBit
                     Modifiers = modifiers
             }
 
-            {
-                model with
-                    Canvas = nextCanvas
-                    Mouse = nextMouse
-            },
+            { model with Mouse = nextMouse },
             Cmd.none
         | CanvasMouseUp(position, modifiers) ->
+            let committedCanvas =
+                if model.Mouse.IsDown && model.Tool = Pencil then
+                    match model.Mouse.StrokeCanvas, model.Mouse.StrokeBit with
+                    | Some strokeCanvas, Some strokeBit ->
+                        match model.Mouse.Current with
+                        | Some current -> Pencil.drawSegment strokeBit current position strokeCanvas
+                        | None -> ()
+
+                        strokeCanvas
+                    | _ -> model.Canvas
+                else
+                    model.Canvas
+
             let nextMouse = {
                 model.Mouse with
                     IsDown = false
                     Last = model.Mouse.Current
                     Current = Some position
                     Start = None
+                    StrokeCanvas = None
+                    StrokeBit = None
                     Modifiers = modifiers
             }
 
-            { model with Mouse = nextMouse }, Cmd.none
+            {
+                model with
+                    Canvas = committedCanvas
+                    Mouse = nextMouse
+            },
+            Cmd.none
         | Undo -> model, Cmd.none
         | Redo -> model, Cmd.none
         | ClearSelection -> model, Cmd.none

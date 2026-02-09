@@ -63,6 +63,7 @@ let CanvasView (model: Model) (dispatch: Msg -> unit) =
     let zoom = max 1 model.UI.Zoom
     let scaledWidth = BitCanvas.Width * zoom
     let scaledHeight = BitCanvas.Height * zoom
+    let activeCanvas = model.Mouse.StrokeCanvas |> Option.defaultValue model.Canvas
 
     React.useEffect (fun () ->
         match canvasRef.current with
@@ -73,7 +74,7 @@ let CanvasView (model: Model) (dispatch: Msg -> unit) =
             | context ->
                 let canvasContext = context :?> CanvasRenderingContext2D
                 canvasContext.imageSmoothingEnabled <- false
-                canvasContext.putImageData (BitCanvas.toImageData zoom model.Canvas, 0.0, 0.0)
+                canvasContext.putImageData (BitCanvas.toImageData zoom activeCanvas, 0.0, 0.0)
                 drawPixelGrid canvasContext scaledWidth scaledHeight zoom
     )
 
