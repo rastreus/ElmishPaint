@@ -184,3 +184,13 @@ Date: 2026-02-09T03:08:23Z
 - Added coverage in `src/Components/Toolbar.test.fs`, `src/Components/StatusBar.test.fs`, and expanded `src/App.test.fs` for zoom interaction, coordinate updates on canvas mouse move, undo/redo enablement, and toolbar presence.
 - Updated `src/ElmishPaint.fsproj` compile order for new components/tests and verified all required loops pass (`dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`).
 - AGENTS.md updates made: none.
+## Iteration 19 — S18-keyboard — Keyboard shortcuts
+Date: 2026-02-09T03:28:17Z
+- Added document-level keyboard subscription in `src/App.fs` using `React.useEffectOnce`; keydown now dispatches `KeyDown` with modifier state.
+- Extended `KeyDown` handling in `src/Update.fs` for tool shortcuts (`P/E/L/R/F/M`), zoom shortcuts (`1/2/3/4` -> `1x/2x/4x/8x`), primary-modifier undo/redo (`Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z`), export shortcuts (`Ctrl/Cmd+S`, `Ctrl/Cmd+Shift+S`), marquee movement arrows, `Escape` cancel, and `Delete/Backspace` clear.
+- Prevented browser defaults for primary-modifier `z/s/i` combos and ignored shortcuts when `input/textarea/select` or `contentEditable` has focus.
+- Implemented `Ctrl/Cmd+I` import shortcut by programmatically clicking the hidden toolbar file input.
+- Added shortcut discoverability tooltips in `src/Components/Toolbar.fs` for tool, zoom, undo/redo, import, and export buttons.
+- Added tests in `src/Update.test.fs`, `src/App.test.fs`, and `src/Components/Toolbar.test.fs` covering shortcut mapping, focused-input suppression, save-dialog prevention, import trigger, and tooltip titles.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.

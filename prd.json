@@ -303,7 +303,7 @@
         "Ctrl+S prevents browser save dialog",
         "Shortcuts discoverable via tooltips on toolbar buttons"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S19-dithering",
