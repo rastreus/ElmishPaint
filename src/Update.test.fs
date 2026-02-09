@@ -132,4 +132,32 @@ Vitest.describe (
                 for i in 0..5 do
                     Vitest.expect(BitCanvas.getPixel i i upModel.Canvas).toEqual (Black)
         )
+
+        Vitest.test (
+            "undo restores pre-stroke canvas and redo restores committed stroke",
+            fun () ->
+                let model = fst (Runtime.init ())
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 4; Y = 4 }, noModifiers)) model
+
+                let strokeModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 4; Y = 4 }, noModifiers)) downModel
+
+                Vitest.expect(BitCanvas.getPixel 4 4 strokeModel.Canvas).toEqual (Black)
+                Vitest.expect(List.length strokeModel.History.UndoStack).toBe (1)
+                Vitest.expect(List.length strokeModel.History.RedoStack).toBe (0)
+
+                let undoneModel, _ = Runtime.update Undo strokeModel
+
+                Vitest.expect(BitCanvas.getPixel 4 4 undoneModel.Canvas).toEqual (White)
+                Vitest.expect(List.length undoneModel.History.UndoStack).toBe (0)
+                Vitest.expect(List.length undoneModel.History.RedoStack).toBe (1)
+
+                let redoneModel, _ = Runtime.update Redo undoneModel
+
+                Vitest.expect(BitCanvas.getPixel 4 4 redoneModel.Canvas).toEqual (Black)
+                Vitest.expect(List.length redoneModel.History.UndoStack).toBe (1)
+                Vitest.expect(List.length redoneModel.History.RedoStack).toBe (0)
+        )
 )
