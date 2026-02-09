@@ -9,14 +9,13 @@ open Vitest
 let private createImageData (pixels: Fable.Core.JS.Uint8ClampedArray) (width: int) (height: int) =
     emitJsExpr (pixels, width, height) "new ImageData($0, $1, $2)"
 
-let private regionToBits width height (canvas: App.BitCanvas) =
-    [|
-        for y in 0 .. (height - 1) ->
-            [|
-                for x in 0 .. (width - 1) do
-                    BitCanvas.getPixel x y canvas
-            |]
-    |]
+let private regionToBits width height (canvas: App.BitCanvas) = [|
+    for y in 0 .. (height - 1) ->
+        [|
+            for x in 0 .. (width - 1) do
+                BitCanvas.getPixel x y canvas
+        |]
+|]
 
 let private countBlackPixels width height (canvas: App.BitCanvas) =
     let mutable count = 0

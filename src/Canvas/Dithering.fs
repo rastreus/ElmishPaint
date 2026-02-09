@@ -63,9 +63,7 @@ module Dithering =
         let targetPixels = Array.create (TargetWidth * TargetHeight) WhitePoint
 
         let scale =
-            min
-                (float TargetWidth / float sourceWidth)
-                (float TargetHeight / float sourceHeight)
+            min (float TargetWidth / float sourceWidth) (float TargetHeight / float sourceHeight)
 
         let scaledWidth = max 1 (int (floor (float sourceWidth * scale)))
         let scaledHeight = max 1 (int (floor (float sourceHeight * scale)))
