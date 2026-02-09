@@ -66,30 +66,38 @@ module Runtime =
             Cmd.none
         | SelectPattern pattern -> { model with Pattern = pattern }, Cmd.none
         | CanvasMouseDown(position, modifiers) ->
-            let strokeCanvas, strokeBit, strokeBrushSize, committedCanvas, nextHistory, isDown =
+            let strokeCanvas, strokeBit, strokeBrushSize, committedCanvas, nextHistory, isDown, nextSelection =
                 match model.Tool with
                 | Pencil ->
                     let nextStrokeCanvas, nextStrokeBit = Pencil.beginStroke position model.Canvas
-                    Some nextStrokeCanvas, Some nextStrokeBit, None, model.Canvas, model.History, true
+                    Some nextStrokeCanvas, Some nextStrokeBit, None, model.Canvas, model.History, true, model.Selection
                 | Eraser ->
                     let brushSize = model.ToolOptions.EraserBrushSize
                     let nextStrokeCanvas = Eraser.beginStroke position brushSize model.Canvas
-                    Some nextStrokeCanvas, None, Some brushSize, model.Canvas, model.History, true
+                    Some nextStrokeCanvas, None, Some brushSize, model.Canvas, model.History, true, model.Selection
                 | Line ->
                     let nextStrokeCanvas = Line.buildPreview position position model.Canvas
-                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true
+                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true, model.Selection
                 | Rectangle ->
                     let nextStrokeCanvas = Rectangle.buildOutlinePreview position position model.Canvas
-                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true
+                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true, model.Selection
                 | FilledRectangle ->
                     let nextStrokeCanvas =
                         Rectangle.buildFilledPreview position position model.Pattern model.Canvas
 
-                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true
+                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true, model.Selection
                 | FloodFill ->
                     let filledCanvas = FloodFill.fill position model.Pattern model.Canvas
-                    None, None, None, filledCanvas, History.push model.Canvas model.History, false
-                | _ -> None, None, None, model.Canvas, model.History, true
+                    None, None, None, filledCanvas, History.push model.Canvas model.History, false, model.Selection
+                | Marquee ->
+                    match model.Selection with
+                    | Some selection when selection.FloatingPixels.IsSome ->
+                        if Marquee.containsPoint position selection then
+                            None, None, None, model.Canvas, model.History, false, model.Selection
+                        else
+                            let stampedCanvas = Marquee.stamp selection model.Canvas
+                            None, None, None, stampedCanvas, model.History, false, None
+                    | _ -> None, None, None, model.Canvas, model.History, true, model.Selection
 
             let nextMouse = {
                 IsDown = isDown
@@ -106,6 +114,7 @@ module Runtime =
                 model with
                     Canvas = committedCanvas
                     History = nextHistory
+                    Selection = nextSelection
                     Mouse = nextMouse
             },
             Cmd.none
@@ -162,7 +171,7 @@ module Runtime =
 
             { model with Mouse = nextMouse }, Cmd.none
         | CanvasMouseUp(position, modifiers) ->
-            let committedCanvas, nextHistory =
+            let committedCanvas, nextHistory, nextSelection =
                 if model.Mouse.IsDown then
                     match model.Tool with
                     | Pencil ->
@@ -172,8 +181,8 @@ module Runtime =
                             | Some current -> Pencil.drawSegment strokeBit current position strokeCanvas
                             | None -> ()
 
-                            strokeCanvas, History.push model.Canvas model.History
-                        | _ -> model.Canvas, model.History
+                            strokeCanvas, History.push model.Canvas model.History, model.Selection
+                        | _ -> model.Canvas, model.History, model.Selection
                     | Eraser ->
                         match model.Mouse.StrokeCanvas, model.Mouse.StrokeBrushSize with
                         | Some strokeCanvas, Some strokeBrushSize ->
@@ -181,32 +190,38 @@ module Runtime =
                             | Some current -> Eraser.drawSegment current position strokeBrushSize strokeCanvas
                             | None -> ()
 
-                            strokeCanvas, History.push model.Canvas model.History
-                        | _ -> model.Canvas, model.History
+                            strokeCanvas, History.push model.Canvas model.History, model.Selection
+                        | _ -> model.Canvas, model.History, model.Selection
                     | Line ->
                         match model.Mouse.Start with
                         | Some start ->
                             let committedCanvas = Line.commit start position model.Canvas
-                            committedCanvas, History.push model.Canvas model.History
-                        | None -> model.Canvas, model.History
+                            committedCanvas, History.push model.Canvas model.History, model.Selection
+                        | None -> model.Canvas, model.History, model.Selection
                     | Rectangle ->
                         match model.Mouse.Start with
                         | Some start ->
                             let committedCanvas = Rectangle.commitOutline start position model.Canvas
 
-                            committedCanvas, History.push model.Canvas model.History
-                        | None -> model.Canvas, model.History
+                            committedCanvas, History.push model.Canvas model.History, model.Selection
+                        | None -> model.Canvas, model.History, model.Selection
                     | FilledRectangle ->
                         match model.Mouse.Start with
                         | Some start ->
                             let committedCanvas =
                                 Rectangle.commitFilled start position model.Pattern model.Canvas
 
-                            committedCanvas, History.push model.Canvas model.History
-                        | None -> model.Canvas, model.History
-                    | _ -> model.Canvas, model.History
+                            committedCanvas, History.push model.Canvas model.History, model.Selection
+                        | None -> model.Canvas, model.History, model.Selection
+                    | FloodFill -> model.Canvas, model.History, model.Selection
+                    | Marquee ->
+                        match model.Mouse.Start with
+                        | Some start ->
+                            let nextSelection, liftedCanvas = Marquee.lift start position model.Canvas
+                            liftedCanvas, History.push model.Canvas model.History, Some nextSelection
+                        | None -> model.Canvas, model.History, model.Selection
                 else
-                    model.Canvas, model.History
+                    model.Canvas, model.History, model.Selection
 
             let nextMouse = {
                 model.Mouse with
@@ -224,6 +239,7 @@ module Runtime =
                 model with
                     Canvas = committedCanvas
                     History = nextHistory
+                    Selection = nextSelection
                     Mouse = nextMouse
             },
             Cmd.none
@@ -245,9 +261,28 @@ module Runtime =
                     History = nextHistory
             },
             Cmd.none
-        | ClearSelection -> model, Cmd.none
-        | MoveSelection _ -> model, Cmd.none
-        | StampSelection -> model, Cmd.none
+        | ClearSelection ->
+            match model.Selection with
+            | Some _ -> { model with Selection = None }, Cmd.none
+            | None -> model, Cmd.none
+        | MoveSelection delta ->
+            match model.Selection with
+            | Some selection when selection.FloatingPixels.IsSome ->
+                let movedSelection = Marquee.move delta selection
+                { model with Selection = Some movedSelection }, Cmd.none
+            | _ -> model, Cmd.none
+        | StampSelection ->
+            match model.Selection with
+            | Some selection when selection.FloatingPixels.IsSome ->
+                let stampedCanvas = Marquee.stamp selection model.Canvas
+
+                {
+                    model with
+                        Canvas = stampedCanvas
+                        Selection = None
+                },
+                Cmd.none
+            | _ -> model, Cmd.none
         | ImportImage _ -> model, Cmd.none
         | ImportPreviewReady _ -> model, Cmd.none
         | ConfirmImport -> model, Cmd.none
@@ -263,4 +298,32 @@ module Runtime =
             else
                 model, Cmd.none
         | ScrollCanvas _ -> model, Cmd.none
-        | KeyDown _ -> model, Cmd.none
+        | KeyDown(key, _) ->
+            match model.Selection with
+            | Some selection when selection.FloatingPixels.IsSome ->
+                match key with
+                | "ArrowUp" ->
+                    let movedSelection = Marquee.move { X = 0; Y = -1 } selection
+                    { model with Selection = Some movedSelection }, Cmd.none
+                | "ArrowDown" ->
+                    let movedSelection = Marquee.move { X = 0; Y = 1 } selection
+                    { model with Selection = Some movedSelection }, Cmd.none
+                | "ArrowLeft" ->
+                    let movedSelection = Marquee.move { X = -1; Y = 0 } selection
+                    { model with Selection = Some movedSelection }, Cmd.none
+                | "ArrowRight" ->
+                    let movedSelection = Marquee.move { X = 1; Y = 0 } selection
+                    { model with Selection = Some movedSelection }, Cmd.none
+                | "Escape" ->
+                    let cancelledCanvas = Marquee.cancel selection model.Canvas
+
+                    {
+                        model with
+                            Canvas = cancelledCanvas
+                            Selection = None
+                    },
+                    Cmd.none
+                | "Delete"
+                | "Backspace" -> { model with Selection = None }, Cmd.none
+                | _ -> model, Cmd.none
+            | _ -> model, Cmd.none
