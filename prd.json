@@ -239,7 +239,7 @@
         "Pattern alignment is global — shifting a shape shifts its pattern content",
         "Vitest tests verify each pattern tile and sampling at boundary coordinates"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S15-pattern-palette",

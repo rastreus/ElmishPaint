@@ -145,3 +145,13 @@ Date: 2026-02-09T02:01:47Z
 - Updated `src/ElmishPaint.fsproj` compile order for `Tools/FloodFill.fs` and `Tools/FloodFill.test.fs`.
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: none.
+## Iteration 15 — S14-patterns — Pattern definitions and sampling
+Date: 2026-02-09T02:17:32Z
+- Added `src/Canvas/Patterns.fs` with 12 built-in 8x8 tiles (`solid-black`, `solid-white`, `checkerboard-50`, `dot-25`, `dot-75`, horizontal/vertical/diagonal stripes, `crosshatch`, `brick`, `polka-dot`) plus `all`, id lookup, and global-coordinate `sample`/`sampleBit`.
+- Switched `Pattern.Tile` in `src/Types.fs` to `bool array array` to keep runtime pattern sampling Fable-safe.
+- Added `src/Canvas/Patterns.test.fs` coverage for tile dimensions/bitmaps, boundary wrapping (including negative coordinates), and global alignment semantics.
+- Rewired `src/Tools/Rectangle.fs` and `src/Tools/FloodFill.fs` to use shared `Patterns.sampleBit`; updated runtime default pattern in `src/Update.fs` to `Patterns.solidBlack`.
+- Updated pattern test helpers in `src/Update.test.fs`, `src/Tools/Rectangle.test.fs`, and `src/Tools/FloodFill.test.fs` to use built-ins via `Patterns.fromId`.
+- Updated `src/ElmishPaint.fsproj` compile order for new `Patterns` source/test modules.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.
