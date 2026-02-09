@@ -25,6 +25,14 @@ let private selectEraser brushSize model =
     let toolModel, _ = Runtime.update (SelectTool Eraser) model
     Runtime.update (SetEraserBrushSize brushSize) toolModel |> fst
 
+let private selectLine model =
+    Runtime.update (SelectTool Line) model |> fst
+
+let private countBlackPixels y canvas =
+    [ 0 .. (BitCanvas.Width - 1) ]
+    |> List.filter (fun x -> BitCanvas.getPixel x y canvas = Black)
+    |> List.length
+
 Vitest.describe (
     "Runtime.init",
     fun () ->
@@ -263,6 +271,52 @@ Vitest.describe (
                 for y in 15..18 do
                     for x in 15..18 do
                         Vitest.expect(BitCanvas.getPixel x y undoneModel.Canvas).toEqual (Black)
+        )
+
+        Vitest.test (
+            "line preview XOR-inverts pixels over white and black regions while dragging",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 1 0 Black model.Canvas
+                let lineModel = selectLine model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 0; Y = 0 }, noModifiers)) lineModel
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 2; Y = 0 }, noModifiers)) downModel
+
+                Vitest.expect(BitCanvas.getPixel 0 0 moveModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 1 0 moveModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 2 0 moveModel.Canvas).toEqual (White)
+
+                match moveModel.Mouse.StrokeCanvas with
+                | Some previewCanvas ->
+                    Vitest.expect(BitCanvas.getPixel 0 0 previewCanvas).toEqual (Black)
+                    Vitest.expect(BitCanvas.getPixel 1 0 previewCanvas).toEqual (White)
+                    Vitest.expect(BitCanvas.getPixel 2 0 previewCanvas).toEqual (Black)
+                | None -> failwith "expected a line preview canvas"
+        )
+
+        Vitest.test (
+            "line mouse-up commits one undo entry and produces inclusive horizontal span",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let lineModel = selectLine model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 0; Y = 100 }, noModifiers)) lineModel
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 511; Y = 100 }, noModifiers)) downModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 511; Y = 100 }, noModifiers)) moveModel
+
+                Vitest.expect(BitCanvas.getPixel 0 100 upModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 511 100 upModel.Canvas).toEqual (Black)
+                Vitest.expect(countBlackPixels 100 upModel.Canvas).toBe (512)
+                Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
         )
 
         Vitest.test (
