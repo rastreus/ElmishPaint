@@ -17,6 +17,7 @@
         <Compile Include="Tools/Line.fs" />
         <Compile Include="Tools/Rectangle.fs" />
         <Compile Include="Tools/FloodFill.fs" />
+        <Compile Include="Tools/Marquee.fs" />
         <Compile Include="Update.fs" />
         <Compile Include="Components/CanvasView.fs" />
         <Compile Include="Components/PatternPalette.fs" />
