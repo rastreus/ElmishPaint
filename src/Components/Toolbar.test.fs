@@ -57,9 +57,18 @@ Vitest.describe (
 
                 Vitest.expect(view.getByTestId ("toolbar-undo")).toHaveAttribute ("title", "Undo (Ctrl/Cmd+Z)")
                 Vitest.expect(view.getByTestId ("toolbar-redo")).toHaveAttribute ("title", "Redo (Ctrl/Cmd+Shift+Z)")
-                Vitest.expect(view.getByTestId ("toolbar-import-button")).toHaveAttribute ("title", "Import (Ctrl/Cmd+I)")
-                Vitest.expect(view.getByTestId ("toolbar-export-1x")).toHaveAttribute ("title", "Export 1x (Ctrl/Cmd+S)")
-                Vitest.expect(view.getByTestId ("toolbar-export-2x")).toHaveAttribute ("title", "Export 2x (Ctrl/Cmd+Shift+S)")
+
+                Vitest
+                    .expect(view.getByTestId ("toolbar-import-button"))
+                    .toHaveAttribute ("title", "Import (Ctrl/Cmd+I)")
+
+                Vitest
+                    .expect(view.getByTestId ("toolbar-export-1x"))
+                    .toHaveAttribute ("title", "Export 1x (Ctrl/Cmd+S)")
+
+                Vitest
+                    .expect(view.getByTestId ("toolbar-export-2x"))
+                    .toHaveAttribute ("title", "Export 2x (Ctrl/Cmd+Shift+S)")
         )
 
         Vitest.test (

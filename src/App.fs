@@ -26,13 +26,13 @@ module private KeyboardShortcuts =
         if isNull activeElement then
             true
         else
-            let tagName = activeElement.tagName.ToLowerInvariant ()
+            let tagName = activeElement.tagName.ToLowerInvariant()
             let isTextInput = tagName = "input" || tagName = "textarea" || tagName = "select"
             let isEditable = (activeElement :?> HTMLElement).isContentEditable
             not (isTextInput || isEditable)
 
     let shouldPreventDefault (ev: KeyboardEvent) =
-        let key = ev.key.ToLowerInvariant ()
+        let key = ev.key.ToLowerInvariant()
         isPrimaryModifierActive ev && (key = "z" || key = "s" || key = "i")
 
     let tryClickImportInput () =
@@ -60,7 +60,7 @@ type AppRoot =
 
                     if
                         KeyboardShortcuts.isPrimaryModifierActive keyEvent
-                        && keyEvent.key.ToLowerInvariant () = "i"
+                        && keyEvent.key.ToLowerInvariant() = "i"
                     then
                         KeyboardShortcuts.tryClickImportInput ()
 

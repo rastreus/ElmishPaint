@@ -92,6 +92,7 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                 prop.children [
                     for zoom in [| 1; 2; 4; 8 |] do
                         let isActive = model.UI.Zoom = zoom
+
                         let zoomShortcut =
                             match zoom with
                             | 1 -> "1"

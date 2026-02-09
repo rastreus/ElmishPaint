@@ -155,12 +155,15 @@ Vitest.describe (
                 Vitest.expect(BitCanvas.getPixel 31 10 strokeModel.Canvas).toEqual (Black)
 
                 let undoneModel, _ = Runtime.update (KeyDown("z", primaryModifiers)) strokeModel
-                let redoneModel, _ = Runtime.update (KeyDown("z", primaryShiftModifiers)) undoneModel
+
+                let redoneModel, _ =
+                    Runtime.update (KeyDown("z", primaryShiftModifiers)) undoneModel
 
                 Vitest.expect(BitCanvas.getPixel 31 10 undoneModel.Canvas).toEqual (White)
                 Vitest.expect(BitCanvas.getPixel 31 10 redoneModel.Canvas).toEqual (Black)
 
                 let exportOneShortcutResult = Runtime.update (KeyDown("s", primaryModifiers)) model
+
                 let exportTwoShortcutResult =
                     Runtime.update (KeyDown("s", primaryShiftModifiers)) model
 

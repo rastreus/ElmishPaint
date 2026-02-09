@@ -304,7 +304,7 @@ module Runtime =
                 model, Cmd.none
         | ScrollCanvas _ -> model, Cmd.none
         | KeyDown(key, modifiers) ->
-            let normalizedKey = key.ToLowerInvariant ()
+            let normalizedKey = key.ToLowerInvariant()
             let hasPrimaryModifier = modifiers.Ctrl || modifiers.Meta
             let dispatchShortcut msg = update msg model
 
