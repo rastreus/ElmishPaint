@@ -2,7 +2,10 @@ module App.Components.CanvasView
 
 open App
 open App.Canvas
+open App.Tools
+open Browser.Dom
 open Browser.Types
+open Fable.Core
 open Feliz
 
 let private toModifiers (ev: MouseEvent) = {
@@ -57,13 +60,62 @@ let private drawPixelGrid (canvasContext: CanvasRenderingContext2D) scaledWidth 
 
         canvasContext.stroke ()
 
+let private tryGetMarqueeBounds model =
+    match model.Selection with
+    | Some selection when selection.FloatingPixels.IsSome -> Some(Marquee.boundsWithOffset selection)
+    | _ when model.Tool = Marquee && model.Mouse.IsDown ->
+        match model.Mouse.Start, model.Mouse.Current with
+        | Some startPoint, Some currentPoint -> Some(Marquee.normalizeBounds startPoint currentPoint)
+        | _ -> None
+    | _ -> None
+
+let private drawMarqueeAnts (canvasContext: CanvasRenderingContext2D) zoom antsPhase (left, top, right, bottom) =
+    let clampedLeft = max left 0
+    let clampedTop = max top 0
+    let clampedRight = min right (BitCanvas.Width - 1)
+    let clampedBottom = min bottom (BitCanvas.Height - 1)
+
+    if clampedLeft <= clampedRight && clampedTop <= clampedBottom then
+        let drawX = (float (clampedLeft * zoom)) + 0.5
+        let drawY = (float (clampedTop * zoom)) + 0.5
+        let drawWidth = float ((clampedRight - clampedLeft + 1) * zoom)
+        let drawHeight = float ((clampedBottom - clampedTop + 1) * zoom)
+        let dashOffset = -float antsPhase
+
+        canvasContext.lineWidth <- 1.0
+        canvasContext.setLineDash [| 4.0; 4.0 |]
+        canvasContext.strokeStyle <- U3.Case1 "#000000"
+        canvasContext.lineDashOffset <- dashOffset
+        canvasContext.strokeRect (drawX, drawY, drawWidth, drawHeight)
+        canvasContext.strokeStyle <- U3.Case1 "#ffffff"
+        canvasContext.lineDashOffset <- dashOffset + 4.0
+        canvasContext.strokeRect (drawX, drawY, drawWidth, drawHeight)
+        canvasContext.setLineDash [||]
+
 [<ReactComponent>]
 let CanvasView (model: Model) (dispatch: Msg -> unit) =
     let canvasRef = React.useRef<HTMLCanvasElement option> (None)
+    let antsPhase, setAntsPhase = React.useState (0)
     let zoom = max 1 model.UI.Zoom
     let scaledWidth = BitCanvas.Width * zoom
     let scaledHeight = BitCanvas.Height * zoom
-    let activeCanvas = model.Mouse.StrokeCanvas |> Option.defaultValue model.Canvas
+    let marqueeBounds = tryGetMarqueeBounds model
+
+    let activeCanvas =
+        match model.Mouse.StrokeCanvas with
+        | Some strokeCanvas -> strokeCanvas
+        | None ->
+            match model.Selection with
+            | Some selection when selection.FloatingPixels.IsSome -> Marquee.compose selection model.Canvas
+            | _ -> model.Canvas
+
+    React.useEffect (
+        (fun () ->
+            let intervalId = window.setTimeout ((fun () -> setAntsPhase ((antsPhase + 1) % 8)), 120)
+            fun () -> window.clearTimeout intervalId
+        ),
+        [| box antsPhase |]
+    )
 
     React.useEffect (fun () ->
         match canvasRef.current with
@@ -76,6 +128,7 @@ let CanvasView (model: Model) (dispatch: Msg -> unit) =
                 canvasContext.imageSmoothingEnabled <- false
                 canvasContext.putImageData (BitCanvas.toImageData zoom activeCanvas, 0.0, 0.0)
                 drawPixelGrid canvasContext scaledWidth scaledHeight zoom
+                marqueeBounds |> Option.iter (drawMarqueeAnts canvasContext zoom antsPhase)
     )
 
     let dispatchMouseEvent makeMsg (ev: MouseEvent) =

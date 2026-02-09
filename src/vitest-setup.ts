@@ -67,21 +67,39 @@ if (typeof HTMLCanvasElement !== 'undefined') {
         __lastImageData?: ImageData;
         __putImageDataCalls?: number;
         __strokeCalls?: number;
+        __strokeRectCalls?: number;
+        __lineDashCalls?: number;
+        __lineDashOffsets?: number[];
       };
+
+      let lineDashOffset = 0;
 
       return {
         imageSmoothingEnabled: false,
         strokeStyle: '#000000',
         lineWidth: 1,
+        get lineDashOffset() {
+          return lineDashOffset;
+        },
+        set lineDashOffset(value: number) {
+          lineDashOffset = value;
+        },
         putImageData(imageData: ImageData) {
           element.__lastImageData = imageData;
           element.__putImageDataCalls = (element.__putImageDataCalls ?? 0) + 1;
+        },
+        setLineDash() {
+          element.__lineDashCalls = (element.__lineDashCalls ?? 0) + 1;
         },
         beginPath() {},
         moveTo() {},
         lineTo() {},
         stroke() {
           element.__strokeCalls = (element.__strokeCalls ?? 0) + 1;
+        },
+        strokeRect() {
+          element.__strokeRectCalls = (element.__strokeRectCalls ?? 0) + 1;
+          element.__lineDashOffsets = [...(element.__lineDashOffsets ?? []), lineDashOffset];
         },
       };
     },

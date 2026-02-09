@@ -1,6 +1,7 @@
 module Tests.Components.CanvasView
 
 open App
+open App.Canvas
 open App.Components.CanvasView
 open Browser.Types
 open Fable.Core.JsInterop
@@ -21,6 +22,39 @@ let private getStrokeCalls (canvas: HTMLCanvasElement) =
         0
     else
         unbox<int> canvas?__strokeCalls
+
+let private getStrokeRectCalls (canvas: HTMLCanvasElement) =
+    if isNullOrUndefined canvas?__strokeRectCalls then
+        0
+    else
+        unbox<int> canvas?__strokeRectCalls
+
+let private getLineDashCalls (canvas: HTMLCanvasElement) =
+    if isNullOrUndefined canvas?__lineDashCalls then
+        0
+    else
+        unbox<int> canvas?__lineDashCalls
+
+let private getLineDashOffsets (canvas: HTMLCanvasElement) =
+    if isNullOrUndefined canvas?__lineDashOffsets then
+        [||]
+    else
+        unbox<float array> canvas?__lineDashOffsets
+
+let private selectMarquee model =
+    Runtime.update (SelectTool Marquee) model |> fst
+
+let private liftSinglePixelSelection x y model =
+    let marqueeModel = selectMarquee model
+    let modifiers = {
+        Shift = false
+        Ctrl = false
+        Alt = false
+        Meta = false
+    }
+
+    let downModel, _ = Runtime.update (CanvasMouseDown({ X = x; Y = y }, modifiers)) marqueeModel
+    Runtime.update (CanvasMouseUp({ X = x; Y = y }, modifiers)) downModel |> fst
 
 Vitest.describe (
     "CanvasView",
@@ -152,5 +186,65 @@ Vitest.describe (
                 let canvas = view.getByTestId ("paint-canvas") :?> HTMLCanvasElement
 
                 Vitest.expect(getStrokeCalls canvas).toBe (0)
+        )
+
+        Vitest.test (
+            "renders moved marquee selection as composed preview pixels",
+            fun () ->
+                let model = defaultModel ()
+                BitCanvas.setPixel 30 12 Black model.Canvas
+                let liftedModel = liftSinglePixelSelection 30 12 model
+                let movedModel, _ = Runtime.update (MoveSelection { X = 2; Y = 0 }) liftedModel
+
+                let view = RTL.render (CanvasView movedModel ignore)
+                let canvas = view.getByTestId ("paint-canvas") :?> HTMLCanvasElement
+                let imageData: ImageData = unbox canvas?__lastImageData
+                let pixelOffset x y = ((y * 512) + x) * 4
+
+                Vitest.expect(imageData.data[pixelOffset 30 12]).toBe (255uy)
+                Vitest.expect(imageData.data[pixelOffset 32 12]).toBe (0uy)
+        )
+
+        Vitest.test (
+            "draws marching ants rectangle while marquee drag is active",
+            fun () ->
+                let model = defaultModel ()
+                let marqueeModel = selectMarquee model
+                let modifiers = {
+                    Shift = false
+                    Ctrl = false
+                    Alt = false
+                    Meta = false
+                }
+
+                let downModel, _ = Runtime.update (CanvasMouseDown({ X = 5; Y = 5 }, modifiers)) marqueeModel
+                let dragModel, _ = Runtime.update (CanvasMouseMove({ X = 8; Y = 8 }, modifiers)) downModel
+
+                let view = RTL.render (CanvasView dragModel ignore)
+                let canvas = view.getByTestId ("paint-canvas") :?> HTMLCanvasElement
+
+                Vitest.expect(getStrokeRectCalls canvas).toBeGreaterThan (0)
+                Vitest.expect(getLineDashCalls canvas).toBeGreaterThan (0)
+        )
+
+        Vitest.test (
+            "marching ants animation advances dash offset over time",
+            fun () -> promise {
+                let model = defaultModel ()
+                BitCanvas.setPixel 50 50 Black model.Canvas
+                let liftedModel = liftSinglePixelSelection 50 50 model
+
+                let view = RTL.render (CanvasView liftedModel ignore)
+                let canvas = view.getByTestId ("paint-canvas") :?> HTMLCanvasElement
+                let initialOffsets = getLineDashOffsets canvas
+
+                do! RTL.act (fun () -> promise { do! Promise.sleep 260 })
+
+                let animatedOffsets = getLineDashOffsets canvas
+                let distinctOffsets = animatedOffsets |> Array.distinct
+
+                Vitest.expect(animatedOffsets.Length).toBeGreaterThan (initialOffsets.Length)
+                Vitest.expect(distinctOffsets.Length).toBeGreaterThan (1)
+            }
         )
 )
