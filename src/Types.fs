@@ -56,6 +56,8 @@ type MouseState = {
     Start: Point option
     Last: Point option
     Current: Point option
+    StrokeCanvas: BitCanvas option
+    StrokeBit: Bit option
     Modifiers: Modifiers
 }
 

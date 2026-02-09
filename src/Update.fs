@@ -31,6 +31,8 @@ module Runtime =
                 Start = None
                 Last = None
                 Current = None
+                StrokeCanvas = None
+                StrokeBit = None
                 Modifiers = defaultModifiers
             }
             Selection = None
@@ -73,6 +75,8 @@ module Runtime =
                 Start = Some position
                 Last = Some position
                 Current = Some position
+                StrokeCanvas = None
+                StrokeBit = None
                 Modifiers = modifiers
             }
 
