@@ -43,7 +43,8 @@ delete window.__exportOriginalClick;
 delete window.__exportTest;
 """
 
-let private capturedClicks () : int = emitJsExpr () "(window.__exportTest?.clicks ?? 0)"
+let private capturedClicks () : int =
+    emitJsExpr () "(window.__exportTest?.clicks ?? 0)"
 
 let private capturedDownloadAt index : string =
     emitJsExpr index "(window.__exportTest?.links?.[$0]?.download ?? '')"
@@ -51,7 +52,8 @@ let private capturedDownloadAt index : string =
 let private capturedHrefAt index : string =
     emitJsExpr index "(window.__exportTest?.links?.[$0]?.href ?? '')"
 
-let private capturedCanvas () : HTMLCanvasElement = emitJsExpr () "(window.__exportTest?.canvas ?? null)"
+let private capturedCanvas () : HTMLCanvasElement =
+    emitJsExpr () "(window.__exportTest?.canvas ?? null)"
 
 let private capturedImageData () =
     let canvas = capturedCanvas ()
@@ -81,11 +83,7 @@ let private assertMonochrome (imageData: ImageData) =
         let blue = int data[index + 2]
         let alpha = int data[index + 3]
 
-        isValid <-
-            red = green
-            && green = blue
-            && alpha = 255
-            && (red = 0 || red = 255)
+        isValid <- red = green && green = blue && alpha = 255 && (red = 0 || red = 255)
 
         index <- index + 4
 

@@ -7,12 +7,14 @@ open Fable.Core.JsInterop
 
 [<RequireQualifiedAccess>]
 module ImageExport =
-    let private scaleFactor = function
+    let private scaleFactor =
+        function
         | Scale1x -> 1
         | Scale2x -> 2
         | Scale4x -> 4
 
-    let private scaleLabel = function
+    let private scaleLabel =
+        function
         | Scale1x -> "1x"
         | Scale2x -> "2x"
         | Scale4x -> "4x"
