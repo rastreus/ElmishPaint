@@ -21,6 +21,10 @@ let private clickStroke x y model =
 
     upModel
 
+let private selectEraser brushSize model =
+    let toolModel, _ = Runtime.update (SelectTool Eraser) model
+    Runtime.update (SetEraserBrushSize brushSize) toolModel |> fst
+
 Vitest.describe (
     "Runtime.init",
     fun () ->
@@ -140,6 +144,125 @@ Vitest.describe (
 
                 for i in 0..5 do
                     Vitest.expect(BitCanvas.getPixel i i upModel.Canvas).toEqual (Black)
+        )
+
+        Vitest.test (
+            "SetEraserBrushSize updates tool options",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let nextModel, cmd = Runtime.update (SetEraserBrushSize Brush8) model
+
+                Vitest.expect(nextModel.ToolOptions.EraserBrushSize).toEqual (Brush8)
+                Vitest.expect(cmd).toEqual (Cmd.none)
+        )
+
+        Vitest.test (
+            "eraser at Brush1 clears black pixels on click",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 8 8 Black model.Canvas
+                let eraserModel = selectEraser Brush1 model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 8; Y = 8 }, noModifiers)) eraserModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 8; Y = 8 }, noModifiers)) downModel
+
+                Vitest.expect(BitCanvas.getPixel 8 8 upModel.Canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "eraser at Brush8 clears an 8x8 block on click",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.fill Black model.Canvas
+                let eraserModel = selectEraser Brush8 model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 10; Y = 10 }, noModifiers)) eraserModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 10; Y = 10 }, noModifiers)) downModel
+
+                for y in 10..17 do
+                    for x in 10..17 do
+                        Vitest.expect(BitCanvas.getPixel x y upModel.Canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "eraser drag leaves a continuous white trail",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.fill Black model.Canvas
+                let eraserModel = selectEraser Brush1 model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 0; Y = 0 }, noModifiers)) eraserModel
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 5; Y = 5 }, noModifiers)) downModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 5; Y = 5 }, noModifiers)) moveModel
+
+                for i in 0..5 do
+                    Vitest.expect(BitCanvas.getPixel i i upModel.Canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "changing eraser brush size applies on next stroke, not mid-stroke",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.fill Black model.Canvas
+                let eraserModel = selectEraser Brush1 model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 20; Y = 20 }, noModifiers)) eraserModel
+
+                let resizedModel, _ = Runtime.update (SetEraserBrushSize Brush8) downModel
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 21; Y = 20 }, noModifiers)) resizedModel
+
+                let firstUpModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 21; Y = 20 }, noModifiers)) moveModel
+
+                Vitest.expect(BitCanvas.getPixel 20 20 firstUpModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 21 20 firstUpModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 27 20 firstUpModel.Canvas).toEqual (Black)
+
+                let nextDownModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 30; Y = 30 }, noModifiers)) firstUpModel
+
+                let nextUpModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 30; Y = 30 }, noModifiers)) nextDownModel
+
+                for y in 30..37 do
+                    for x in 30..37 do
+                        Vitest.expect(BitCanvas.getPixel x y nextUpModel.Canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "eraser stroke commits as a single undo entry",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.fill Black model.Canvas
+                let eraserModel = selectEraser Brush4 model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 15; Y = 15 }, noModifiers)) eraserModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 15; Y = 15 }, noModifiers)) downModel
+
+                Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
+
+                let undoneModel, _ = Runtime.update Undo upModel
+
+                for y in 15..18 do
+                    for x in 15..18 do
+                        Vitest.expect(BitCanvas.getPixel x y undoneModel.Canvas).toEqual (Black)
         )
 
         Vitest.test (
