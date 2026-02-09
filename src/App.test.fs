@@ -25,7 +25,7 @@ Vitest.describe (
             fun () -> promise {
                 let ele = RTL.render (App.AppRoot.App())
                 let activeTool = ele.getByTestId ("active-tool")
-                let selectLine = ele.getByTestId ("select-line")
+                let selectLine = ele.getByTestId ("toolbar-tool-line")
 
                 Vitest.expect(activeTool).toHaveTextContent ("Active tool: Pencil")
 

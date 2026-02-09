@@ -22,6 +22,7 @@
         <Compile Include="Components/CanvasView.fs" />
         <Compile Include="Components/PatternPalette.fs" />
         <Compile Include="Components/Toolbar.fs" />
+        <Compile Include="Components/StatusBar.fs" />
         <Compile Include="App.fs" />
         <Compile Include="App.test.fs" />
         <Compile Include="Components/CanvasView.test.fs" />
