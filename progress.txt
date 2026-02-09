@@ -1,1 +1,8 @@
-
+## Iteration 1 — S22-weekend-wrap — Weekend wrap-up: GitHub Pages deployment
+Date: 2026-02-09T06:45:11Z
+- Set Vite base path to `/ElmishPaint/` so assets resolve under GitHub Pages project URL.
+- Updated `package.json` scripts to include `dev` and `preview` while preserving existing start/build/test behavior.
+- Added `.github/workflows/deploy.yml` to install via pnpm, run `pnpm build`, upload `./dist`, and deploy via Pages actions.
+- Verification completed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Files changed: `vite.config.js`, `package.json`, `.github/workflows/deploy.yml`, `prd.json`, `progress.txt`.
+- AGENTS.md updates: none.
