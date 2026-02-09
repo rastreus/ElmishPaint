@@ -35,6 +35,15 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
+      - name: Install Fable dependencies
+        run: dotnet paket install
+
+      - name: Build Fable
+        run: dotnet build
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
