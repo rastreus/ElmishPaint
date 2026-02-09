@@ -16,6 +16,8 @@ type Msg =
     | StampSelection
     | ImportImage of file: File
     | ImportPreviewReady of preview: ImportPreview
+    | SetImportThreshold of thresholdOffset: int
+    | SetImportBrightness of brightness: int
     | ConfirmImport
     | CancelImport
     | ExportPNG of scale: ExportScale

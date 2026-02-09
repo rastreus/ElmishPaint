@@ -290,6 +290,8 @@ module Runtime =
             | _ -> model, Cmd.none
         | ImportImage _ -> model, Cmd.none
         | ImportPreviewReady _ -> model, Cmd.none
+        | SetImportThreshold _ -> model, Cmd.none
+        | SetImportBrightness _ -> model, Cmd.none
         | ConfirmImport -> model, Cmd.none
         | CancelImport -> model, Cmd.none
         | ExportPNG _ -> model, Cmd.none

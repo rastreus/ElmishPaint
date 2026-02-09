@@ -86,6 +86,7 @@ type ImportPreview = {
     FileName: string
     ThresholdOffset: int
     Brightness: int
+    ScaledPixels: float array
     PreviewCanvas: BitCanvas
 }
 
