@@ -12,6 +12,7 @@
         <Compile Include="Canvas/BitCanvas.fs" />
         <Compile Include="History.fs" />
         <Compile Include="Tools/Pencil.fs" />
+        <Compile Include="Tools/Eraser.fs" />
         <Compile Include="Update.fs" />
         <Compile Include="Components/CanvasView.fs" />
         <Compile Include="App.fs" />
