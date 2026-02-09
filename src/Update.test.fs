@@ -75,14 +75,18 @@ Vitest.describe (
             fun () ->
                 let model = fst (Runtime.init ())
 
-                let downModel, _ = Runtime.update (CanvasMouseDown({ X = 5; Y = 5 }, noModifiers)) model
-                let moveModel, _ = Runtime.update (CanvasMouseMove({ X = 7; Y = 5 }, noModifiers)) downModel
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 5; Y = 5 }, noModifiers)) model
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 7; Y = 5 }, noModifiers)) downModel
 
                 Vitest.expect(BitCanvas.getPixel 5 5 moveModel.Canvas).toEqual (White)
                 Vitest.expect(BitCanvas.getPixel 6 5 moveModel.Canvas).toEqual (White)
                 Vitest.expect(BitCanvas.getPixel 7 5 moveModel.Canvas).toEqual (White)
 
-                let upModel, _ = Runtime.update (CanvasMouseUp({ X = 7; Y = 5 }, noModifiers)) moveModel
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 7; Y = 5 }, noModifiers)) moveModel
 
                 Vitest.expect(BitCanvas.getPixel 5 5 upModel.Canvas).toEqual (Black)
                 Vitest.expect(BitCanvas.getPixel 6 5 upModel.Canvas).toEqual (Black)
@@ -95,12 +99,16 @@ Vitest.describe (
                 let model = fst (Runtime.init ())
                 BitCanvas.setPixel 10 10 Black model.Canvas
 
-                let downModel, _ = Runtime.update (CanvasMouseDown({ X = 10; Y = 10 }, noModifiers)) model
-                let moveModel, _ = Runtime.update (CanvasMouseMove({ X = 12; Y = 10 }, noModifiers)) downModel
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 10; Y = 10 }, noModifiers)) model
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 12; Y = 10 }, noModifiers)) downModel
 
                 Vitest.expect(BitCanvas.getPixel 12 10 moveModel.Canvas).toEqual (White)
 
-                let upModel, _ = Runtime.update (CanvasMouseUp({ X = 12; Y = 10 }, noModifiers)) moveModel
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 12; Y = 10 }, noModifiers)) moveModel
 
                 Vitest.expect(BitCanvas.getPixel 10 10 upModel.Canvas).toEqual (White)
                 Vitest.expect(BitCanvas.getPixel 11 10 upModel.Canvas).toEqual (White)
@@ -112,11 +120,16 @@ Vitest.describe (
             fun () ->
                 let model = fst (Runtime.init ())
 
-                let downModel, _ = Runtime.update (CanvasMouseDown({ X = 0; Y = 0 }, noModifiers)) model
-                let moveModel, _ = Runtime.update (CanvasMouseMove({ X = 5; Y = 5 }, noModifiers)) downModel
-                let upModel, _ = Runtime.update (CanvasMouseUp({ X = 5; Y = 5 }, noModifiers)) moveModel
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 0; Y = 0 }, noModifiers)) model
 
-                for i in 0 .. 5 do
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 5; Y = 5 }, noModifiers)) downModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 5; Y = 5 }, noModifiers)) moveModel
+
+                for i in 0..5 do
                     Vitest.expect(BitCanvas.getPixel i i upModel.Canvas).toEqual (Black)
         )
 )

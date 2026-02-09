@@ -12,7 +12,9 @@ Vitest.describe (
             fun () ->
                 let points = Algorithms.bresenhamLine { X = 0; Y = 0 } { X = 3; Y = 0 }
 
-                Vitest.expect(points).toEqual ([ { X = 0; Y = 0 }; { X = 1; Y = 0 }; { X = 2; Y = 0 }; { X = 3; Y = 0 } ])
+                Vitest
+                    .expect(points)
+                    .toEqual ([ { X = 0; Y = 0 }; { X = 1; Y = 0 }; { X = 2; Y = 0 }; { X = 3; Y = 0 } ])
         )
 
         Vitest.test (
@@ -20,7 +22,9 @@ Vitest.describe (
             fun () ->
                 let points = Algorithms.bresenhamLine { X = 2; Y = 1 } { X = 2; Y = 4 }
 
-                Vitest.expect(points).toEqual ([ { X = 2; Y = 1 }; { X = 2; Y = 2 }; { X = 2; Y = 3 }; { X = 2; Y = 4 } ])
+                Vitest
+                    .expect(points)
+                    .toEqual ([ { X = 2; Y = 1 }; { X = 2; Y = 2 }; { X = 2; Y = 3 }; { X = 2; Y = 4 } ])
         )
 
         Vitest.test (
@@ -28,7 +32,9 @@ Vitest.describe (
             fun () ->
                 let points = Algorithms.bresenhamLine { X = 0; Y = 0 } { X = 3; Y = 1 }
 
-                Vitest.expect(points).toEqual ([ { X = 0; Y = 0 }; { X = 1; Y = 0 }; { X = 2; Y = 1 }; { X = 3; Y = 1 } ])
+                Vitest
+                    .expect(points)
+                    .toEqual ([ { X = 0; Y = 0 }; { X = 1; Y = 0 }; { X = 2; Y = 1 }; { X = 3; Y = 1 } ])
         )
 
         Vitest.test (
@@ -36,6 +42,8 @@ Vitest.describe (
             fun () ->
                 let points = Algorithms.bresenhamLine { X = 0; Y = 0 } { X = 1; Y = 3 }
 
-                Vitest.expect(points).toEqual ([ { X = 0; Y = 0 }; { X = 0; Y = 1 }; { X = 1; Y = 2 }; { X = 1; Y = 3 } ])
+                Vitest
+                    .expect(points)
+                    .toEqual ([ { X = 0; Y = 0 }; { X = 0; Y = 1 }; { X = 1; Y = 2 }; { X = 1; Y = 3 } ])
         )
 )

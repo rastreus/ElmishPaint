@@ -18,11 +18,7 @@ module Algorithms =
             else
                 let doubledError = 2 * error
 
-                let nextX, errorAfterX =
-                    if doubledError >= dy then
-                        x + sx, error + dy
-                    else
-                        x, error
+                let nextX, errorAfterX = if doubledError >= dy then x + sx, error + dy else x, error
 
                 let nextY, nextError =
                     if doubledError <= dx then
