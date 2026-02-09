@@ -62,7 +62,10 @@ module Runtime =
         | SetEraserBrushSize brushSize ->
             {
                 model with
-                    ToolOptions = { model.ToolOptions with EraserBrushSize = brushSize }
+                    ToolOptions = {
+                        model.ToolOptions with
+                            EraserBrushSize = brushSize
+                    }
             },
             Cmd.none
         | SelectPattern _ -> model, Cmd.none
