@@ -43,6 +43,7 @@
         <Compile Include="History.test.fs" />
         <Compile Include="Canvas/Algorithms.test.fs" />
         <Compile Include="Canvas/Dithering.test.fs" />
+        <Compile Include="Canvas/ImageExport.test.fs" />
         <Compile Include="Canvas/ImageImport.test.fs" />
         <Compile Include="Canvas/Patterns.test.fs" />
         <Compile Include="Canvas/BitCanvas.test.fs" />
