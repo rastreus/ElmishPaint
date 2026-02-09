@@ -72,6 +72,7 @@ Vitest.describe (
                 let initialView = RTL.render (Toolbar (defaultModel ()) ignore)
                 Vitest.expect(initialView.getByTestId ("toolbar-undo")).toBeDisabled ()
                 Vitest.expect(initialView.getByTestId ("toolbar-redo")).toBeDisabled ()
+                initialView.unmount ()
 
                 let undoOnlyModel =
                     defaultModel ()
@@ -80,6 +81,7 @@ Vitest.describe (
                 let undoOnlyView = RTL.render (Toolbar undoOnlyModel ignore)
                 Vitest.expect(undoOnlyView.getByTestId ("toolbar-undo")).toBeEnabled ()
                 Vitest.expect(undoOnlyView.getByTestId ("toolbar-redo")).toBeDisabled ()
+                undoOnlyView.unmount ()
 
                 let undoRedoModel =
                     defaultModel ()
