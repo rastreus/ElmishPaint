@@ -3,10 +3,43 @@ namespace App
 open Fable.Core
 open Feliz
 open Feliz.UseElmish
+open Browser.Dom
+open Browser.Types
 open App.Components.CanvasView
 open App.Components.PatternPalette
 open App.Components.Toolbar
 open App.Components.StatusBar
+
+module private KeyboardShortcuts =
+    let toModifiers (ev: KeyboardEvent) = {
+        Shift = ev.shiftKey
+        Ctrl = ev.ctrlKey
+        Alt = ev.altKey
+        Meta = ev.metaKey
+    }
+
+    let isPrimaryModifierActive (ev: KeyboardEvent) = ev.ctrlKey || ev.metaKey
+
+    let shouldHandleDocumentShortcut () =
+        let activeElement = document.activeElement
+
+        if isNull activeElement then
+            true
+        else
+            let tagName = activeElement.tagName.ToLowerInvariant ()
+            let isTextInput = tagName = "input" || tagName = "textarea" || tagName = "select"
+            let isEditable = (activeElement :?> HTMLElement).isContentEditable
+            not (isTextInput || isEditable)
+
+    let shouldPreventDefault (ev: KeyboardEvent) =
+        let key = ev.key.ToLowerInvariant ()
+        isPrimaryModifierActive ev && (key = "z" || key = "s" || key = "i")
+
+    let tryClickImportInput () =
+        let input = document.querySelector ("[data-testid='toolbar-import-input']")
+
+        if not (isNull input) then
+            (input :?> HTMLInputElement).click ()
 
 [<Erase; Mangle(false)>]
 type AppRoot =
@@ -14,6 +47,26 @@ type AppRoot =
     [<ReactComponent(true)>]
     static member App() =
         let model, dispatch = React.useElmish (Runtime.init, Runtime.update, [||])
+
+        React.useEffectOnce (fun () ->
+            let handleKeyDown (ev: Event) =
+                let keyEvent = ev :?> KeyboardEvent
+
+                if KeyboardShortcuts.shouldHandleDocumentShortcut () then
+                    if KeyboardShortcuts.shouldPreventDefault keyEvent then
+                        keyEvent.preventDefault ()
+
+                    dispatch (KeyDown(keyEvent.key, KeyboardShortcuts.toModifiers keyEvent))
+
+                    if
+                        KeyboardShortcuts.isPrimaryModifierActive keyEvent
+                        && keyEvent.key.ToLowerInvariant () = "i"
+                    then
+                        KeyboardShortcuts.tryClickImportInput ()
+
+            document.addEventListener ("keydown", handleKeyDown)
+            fun () -> document.removeEventListener ("keydown", handleKeyDown)
+        )
 
         Html.main [
             prop.className "min-h-screen bg-stone-100 px-4 py-6"
