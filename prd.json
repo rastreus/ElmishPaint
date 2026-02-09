@@ -193,7 +193,7 @@
         "Releasing mouse commits the line as a single undo entry",
         "Vitest tests verify line endpoints and pixel count for known inputs"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S12-rectangle",

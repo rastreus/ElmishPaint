@@ -115,3 +115,13 @@ Date: 2026-02-09T01:21:14Z
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Key decision: brush stamps are top-left anchored at cursor coordinates (size x size block from `(x,y)`), with out-of-bounds clipping handled by `BitCanvas.setPixel`.
 - AGENTS.md updates made: none.
+## Iteration 12 — S11-line-tool — Line tool with XOR preview
+Date: 2026-02-09T01:35:15Z
+- Added `src/Tools/Line.fs` with pure line operations: `buildPreview` (XOR-invert along Bresenham path) and `commit` (black line commit on cloned canvas).
+- Added `src/Tools/Line.test.fs` to verify acceptance-level geometry: horizontal `(0,100)->(511,100)` draws exactly 512 black pixels with correct endpoints, plus gap-free 45-degree output and XOR preview toggling behavior.
+- Integrated line tool into `src/Update.fs`: mouse-down seeds preview, mouse-move recomputes XOR preview from base `model.Canvas` (no accumulation artifacts), mouse-up commits one line and pushes one undo entry.
+- Expanded `src/Update.test.fs` with line integration tests for preview visibility on mixed black/white backgrounds and single-entry undo history on release.
+- Updated `src/ElmishPaint.fsproj` compile order for `Tools/Line.fs` and `Tools/Line.test.fs`; formatted modified files with Fantomas.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Gotcha: verification commands that invoke Fable should run sequentially; running standalone `dotnet fable` in parallel with `pnpm test`/`pnpm build` can conflict through shared `src/fable_modules` cleanup.
+- AGENTS.md updates made: none.
