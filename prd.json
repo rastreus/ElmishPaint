@@ -336,7 +336,7 @@
         "Import of 4000x3000 image completes within 2 seconds",
         "UI remains responsive during dithering"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S21-export",

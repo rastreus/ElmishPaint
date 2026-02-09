@@ -202,3 +202,13 @@ Date: 2026-02-09T03:51:56Z
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Key decision: kept a low-level `atkinson` function (for deterministic small-image tests) and a separate `ditherToCanvas` fit-scaling pipeline to support upcoming import flow wiring in S20.
 - AGENTS.md updates made: none.
+## Iteration 21 — S20-import — Image import with dithering preview
+Date: 2026-02-09T04:14:26Z
+- Added async import pipeline in `src/Canvas/ImageImport.fs`: supported MIME/extension validation (PNG/JPEG/GIF/WebP), decode via `createImageBitmap`, scale-to-fit render into 512x342 without distortion, and preview generation with threshold/brightness controls.
+- Extended import state/message flow: `ImportPreview` now stores scaled grayscale pixels; added `SetImportThreshold` and `SetImportBrightness`; wired `ImportImage` to async preview loading, `ImportPreviewReady` to dialog state, `ConfirmImport` to single undo-entry canvas replacement, and `CancelImport` to non-mutating close.
+- Implemented `src/Components/ImportDialog.fs` with preview canvas rendering, threshold/brightness sliders, and confirm/cancel actions; wired dialog into `src/App.fs` overlay rendering when preview is active.
+- Added drag-and-drop import path on `src/Components/Toolbar.fs` and tightened file input accept list to explicit supported formats.
+- Added test coverage in `src/Canvas/ImageImport.test.fs`, `src/Components/ImportDialog.test.fs`, `src/Components/Toolbar.test.fs`, and `src/Update.test.fs` for format acceptance, scale/letterbox behavior, slider-visible preview changes, import confirm/cancel semantics, and unsupported file rejection.
+- Updated `src/ElmishPaint.fsproj` compile ordering for new source/test files and applied Fantomas formatting.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.
