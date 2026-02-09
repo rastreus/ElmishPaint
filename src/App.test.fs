@@ -36,6 +36,21 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "clicking a pattern swatch updates rendered active pattern",
+            fun () -> promise {
+                let ele = RTL.render (App.AppRoot.App())
+                let activePattern = ele.getByTestId ("active-pattern")
+                let checkerSwatch = ele.getByTestId ("pattern-swatch-checkerboard-50")
+
+                Vitest.expect(activePattern).toHaveTextContent ("Active pattern: Solid Black")
+
+                do! RTL.act (fun () -> promise { RTL.fireEvent.click (checkerSwatch) })
+
+                Vitest.expect(activePattern).toHaveTextContent ("Active pattern: Checkerboard 50%")
+            }
+        )
+
+        Vitest.test (
             "canvas mousedown updates pixel and rerenders image data",
             fun () -> promise {
                 let ele = RTL.render (App.AppRoot.App())
