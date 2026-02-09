@@ -14,6 +14,7 @@
         <Compile Include="Tools/Pencil.fs" />
         <Compile Include="Tools/Eraser.fs" />
         <Compile Include="Tools/Line.fs" />
+        <Compile Include="Tools/Rectangle.fs" />
         <Compile Include="Update.fs" />
         <Compile Include="Components/CanvasView.fs" />
         <Compile Include="App.fs" />
