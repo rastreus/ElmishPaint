@@ -70,32 +70,35 @@ module Runtime =
             Cmd.none
         | SelectPattern _ -> model, Cmd.none
         | CanvasMouseDown(position, modifiers) ->
-            let strokeCanvas, strokeBit, strokeBrushSize =
+            let strokeCanvas, strokeBit, strokeBrushSize, committedCanvas, nextHistory, isDown =
                 match model.Tool with
                 | Pencil ->
                     let nextStrokeCanvas, nextStrokeBit = Pencil.beginStroke position model.Canvas
-                    Some nextStrokeCanvas, Some nextStrokeBit, None
+                    Some nextStrokeCanvas, Some nextStrokeBit, None, model.Canvas, model.History, true
                 | Eraser ->
                     let brushSize = model.ToolOptions.EraserBrushSize
                     let nextStrokeCanvas = Eraser.beginStroke position brushSize model.Canvas
-                    Some nextStrokeCanvas, None, Some brushSize
+                    Some nextStrokeCanvas, None, Some brushSize, model.Canvas, model.History, true
                 | Line ->
                     let nextStrokeCanvas = Line.buildPreview position position model.Canvas
-                    Some nextStrokeCanvas, None, None
+                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true
                 | Rectangle ->
                     let nextStrokeCanvas = Rectangle.buildOutlinePreview position position model.Canvas
-                    Some nextStrokeCanvas, None, None
+                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true
                 | FilledRectangle ->
                     let nextStrokeCanvas =
                         Rectangle.buildFilledPreview position position model.Pattern model.Canvas
 
-                    Some nextStrokeCanvas, None, None
-                | _ -> None, None, None
+                    Some nextStrokeCanvas, None, None, model.Canvas, model.History, true
+                | FloodFill ->
+                    let filledCanvas = FloodFill.fill position model.Pattern model.Canvas
+                    None, None, None, filledCanvas, History.push model.Canvas model.History, false
+                | _ -> None, None, None, model.Canvas, model.History, true
 
             let nextMouse = {
-                IsDown = true
-                Start = Some position
-                Last = Some position
+                IsDown = isDown
+                Start = if isDown then Some position else None
+                Last = model.Mouse.Current
                 Current = Some position
                 StrokeCanvas = strokeCanvas
                 StrokeBit = strokeBit
@@ -103,7 +106,13 @@ module Runtime =
                 Modifiers = modifiers
             }
 
-            { model with Mouse = nextMouse }, Cmd.none
+            {
+                model with
+                    Canvas = committedCanvas
+                    History = nextHistory
+                    Mouse = nextMouse
+            },
+            Cmd.none
         | CanvasMouseMove(position, modifiers) ->
             let nextStrokeCanvas, nextStrokeBit, nextStrokeBrushSize =
                 if model.Mouse.IsDown then

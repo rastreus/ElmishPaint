@@ -34,6 +34,9 @@ let private selectRectangle model =
 let private selectFilledRectangle model =
     Runtime.update (SelectTool FilledRectangle) model |> fst
 
+let private selectFloodFill model =
+    Runtime.update (SelectTool FloodFill) model |> fst
+
 let private patternWithId id = {
     Id = id
     Name = id
@@ -401,6 +404,56 @@ Vitest.describe (
                         Vitest.expect(BitCanvas.getPixel x y upModel.Canvas).toEqual (expected)
 
                 Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
+        )
+
+        Vitest.test (
+            "flood fill commits on mouse down and adds a single undo entry",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let floodFillModel = selectFloodFill model
+
+                for x in 0..4 do
+                    BitCanvas.setPixel x 0 Black floodFillModel.Canvas
+                    BitCanvas.setPixel x 4 Black floodFillModel.Canvas
+
+                for y in 0..4 do
+                    BitCanvas.setPixel 0 y Black floodFillModel.Canvas
+                    BitCanvas.setPixel 4 y Black floodFillModel.Canvas
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 2; Y = 2 }, noModifiers)) floodFillModel
+
+                Vitest.expect(BitCanvas.getPixel 2 2 downModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 1 1 downModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 5 2 downModel.Canvas).toEqual (White)
+                Vitest.expect(List.length downModel.History.UndoStack).toBe (1)
+                Vitest.expect(downModel.Mouse.IsDown).toBe (false)
+
+                let upModel, _ = Runtime.update (CanvasMouseUp({ X = 2; Y = 2 }, noModifiers)) downModel
+
+                Vitest.expect(upModel.Canvas).toEqual (downModel.Canvas)
+                Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
+        )
+
+        Vitest.test (
+            "flood fill uses selected pattern sampling",
+            fun () ->
+                let model = fst (Runtime.init ())
+
+                let patternedModel = {
+                    model with
+                        Pattern = patternWithId "checkerboard-50"
+                }
+
+                let floodFillModel = selectFloodFill patternedModel
+
+                let filledModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 0; Y = 0 }, noModifiers)) floodFillModel
+
+                Vitest.expect(BitCanvas.getPixel 0 0 filledModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 1 0 filledModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 0 1 filledModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 1 1 filledModel.Canvas).toEqual (Black)
         )
 
         Vitest.test (
