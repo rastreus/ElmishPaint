@@ -212,3 +212,13 @@ Date: 2026-02-09T04:14:26Z
 - Updated `src/ElmishPaint.fsproj` compile ordering for new source/test files and applied Fantomas formatting.
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: none.
+## Iteration 22 — S21-export — PNG export at multiple scales
+Date: 2026-02-09T04:44:49Z
+- Added `src/Canvas/ImageExport.fs` with `ImageExport.exportPng`: maps `Scale1x|Scale2x|Scale4x`, renders `BitCanvas.toImageData` into an offscreen canvas, and triggers browser download via anchor click (`elmishpaint-1x|2x|4x.png`).
+- Wired `ExportPNG` in `src/Update.fs` to return `Cmd.ofEffect` using a cloned canvas snapshot so export is side-effecting but model-canvas state remains unchanged.
+- Updated shortcut assertions in `src/Update.test.fs` to validate export shortcut model outcomes + command emission without function-equality checks on `Cmd` closures.
+- Added `src/Canvas/ImageExport.test.fs` acceptance coverage: 1x/2x/4x dimensions, 2x 2x2 block expansion, monochrome RGBA validation (`0/255` only), and download trigger/filename checks.
+- Updated `src/ElmishPaint.fsproj` compile order for `Canvas/ImageExport.fs` and `Canvas/ImageExport.test.fs`; applied Fantomas formatting to touched files.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Runtime verification note: browser-runtime `agent-browser` remains unavailable in this sandbox per AGENTS.md discovered pattern; in-sandbox verification completed with full required loops.
+- AGENTS.md updates made: none.

@@ -352,7 +352,7 @@
         "Ctrl+S triggers 1x export",
         "Export does not mutate canvas or model"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S22-bezel",
