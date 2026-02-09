@@ -365,6 +365,11 @@ git-cliff --output CHANGELOG.md
   (`Array2D.create`, `Array2D.init`, `array2D`). Do not construct default
   `bool array2d` tiles in `init`; defer concrete pattern tile construction to
   the patterns story to avoid transpilation errors.
+- Fable 5 in this repo also rejects `array2d` dimension/index APIs at runtime
+  (`System.Array.GetLength`, `GetArray2D`, direct `tile[y, x]` access in
+  transpiled code). Avoid rectangle/pattern implementations that depend on
+  runtime `bool array2d` inspection until the patterns story introduces a
+  Fable-safe representation.
 - `dotnet build` must be run as the first verification step; Fable transpilation alone does not catch all F# compilation errors (e.g., FS0247 namespace/module collisions).
 - `Dom.ImageData.Create` requires a `Uint8ClampedArray` (not a plain `byte array`) and integer dimensions — passing floats causes a runtime `TypeError`.
 - Unit tests with jsdom mocks can miss real browser API mismatches (e.g.,
