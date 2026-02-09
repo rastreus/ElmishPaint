@@ -5,9 +5,7 @@ open App.Canvas
 open Vitest
 
 let private rowToBits (row: bool array) =
-    row
-    |> Array.map (fun bit -> if bit then '1' else '0')
-    |> System.String
+    row |> Array.map (fun bit -> if bit then '1' else '0') |> System.String
 
 let private tileToRows (tile: bool array array) = tile |> Array.map rowToBits
 
@@ -154,10 +152,7 @@ Vitest.describe (
             fun () ->
                 Vitest.expect(Patterns.all.Length).toBe (12)
 
-                let ids =
-                    Patterns.all
-                    |> Array.map (fun pattern -> pattern.Id)
-                    |> Set.ofArray
+                let ids = Patterns.all |> Array.map (fun pattern -> pattern.Id) |> Set.ofArray
 
                 Vitest.expect(ids.Count).toBe (12)
 
@@ -172,7 +167,9 @@ Vitest.describe (
             "built-in pattern bitmaps match expected 8x8 tiles",
             fun () ->
                 for patternId, expectedRows in expectedTiles do
-                    let actualRows = patternId |> Patterns.fromId |> fun pattern -> tileToRows pattern.Tile
+                    let actualRows =
+                        patternId |> Patterns.fromId |> (fun pattern -> tileToRows pattern.Tile)
+
                     Vitest.expect(actualRows).toEqual (expectedRows)
         )
 

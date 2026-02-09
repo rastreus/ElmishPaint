@@ -212,4 +212,5 @@ module Patterns =
         let tileY = wrapToTile y
         pattern.Tile[tileY][tileX]
 
-    let sampleBit pattern x y = if sample pattern x y then Black else White
+    let sampleBit pattern x y =
+        if sample pattern x y then Black else White
