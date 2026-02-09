@@ -20,6 +20,7 @@
         <Compile Include="App.test.fs" />
         <Compile Include="Components/CanvasView.test.fs" />
         <Compile Include="Tools/Eraser.test.fs" />
+        <Compile Include="Tools/Line.test.fs" />
         <Compile Include="Update.test.fs" />
         <Compile Include="History.test.fs" />
         <Compile Include="Canvas/Algorithms.test.fs" />
