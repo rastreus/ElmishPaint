@@ -129,8 +129,7 @@ module Runtime =
                     | Rectangle ->
                         match model.Mouse.Start with
                         | Some start ->
-                            let previewCanvas =
-                                Rectangle.buildOutlinePreview start position model.Canvas
+                            let previewCanvas = Rectangle.buildOutlinePreview start position model.Canvas
 
                             Some previewCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
                         | None -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
@@ -188,8 +187,7 @@ module Runtime =
                     | Rectangle ->
                         match model.Mouse.Start with
                         | Some start ->
-                            let committedCanvas =
-                                Rectangle.commitOutline start position model.Canvas
+                            let committedCanvas = Rectangle.commitOutline start position model.Canvas
 
                             committedCanvas, History.push model.Canvas model.History
                         | None -> model.Canvas, model.History

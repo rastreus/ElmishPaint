@@ -13,11 +13,15 @@ module Rectangle =
         left, top, right, bottom
 
     let private samplePattern pattern x y =
-        let patternId = pattern.Id.ToLowerInvariant ()
+        let patternId = pattern.Id.ToLowerInvariant()
 
         if patternId = "solid-white" then
             White
-        elif patternId = "checkerboard-50" || patternId = "dither-50" || patternId.Contains("checker") then
+        elif
+            patternId = "checkerboard-50"
+            || patternId = "dither-50"
+            || patternId.Contains("checker")
+        then
             if ((x + y) &&& 1) = 0 then Black else White
         else
             Black
