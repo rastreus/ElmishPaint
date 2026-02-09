@@ -214,4 +214,25 @@ Vitest.describe (
                 Vitest.expect(redoModel.UI.Zoom).toBe (8)
                 Vitest.expect(BitCanvas.getPixel 3 3 redoModel.Canvas).toEqual (Black)
         )
+
+        Vitest.test (
+            "fifty sequential strokes can all be undone",
+            fun () ->
+                let mutable model = fst (Runtime.init ())
+
+                for x in 0..49 do
+                    model <- clickStroke x 0 model
+
+                Vitest.expect(List.length model.History.UndoStack).toBe (50)
+
+                for x in 0..49 do
+                    Vitest.expect(BitCanvas.getPixel x 0 model.Canvas).toEqual (Black)
+
+                for _ in 1..50 do
+                    let undoneModel, _ = Runtime.update Undo model
+                    model <- undoneModel
+
+                for x in 0..49 do
+                    Vitest.expect(BitCanvas.getPixel x 0 model.Canvas).toEqual (White)
+        )
 )
