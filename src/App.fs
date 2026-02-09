@@ -4,6 +4,7 @@ open Fable.Core
 open Feliz
 open Feliz.UseElmish
 open App.Components.CanvasView
+open App.Components.PatternPalette
 
 [<Erase; Mangle(false)>]
 type AppRoot =
@@ -20,8 +21,10 @@ type AppRoot =
                     prop.className "text-4xl font-bold tracking-tight text-zinc-900"
                     prop.text "Hello ElmishPaint"
                 ]
+                PatternPalette model.Pattern dispatch
                 CanvasView model dispatch
                 Html.p [ prop.testId "active-tool"; prop.text $"Active tool: {model.Tool}" ]
+                Html.p [ prop.testId "active-pattern"; prop.text $"Active pattern: {model.Pattern.Name}" ]
                 Html.button [
                     prop.testId "select-line"
                     prop.text "Select Line Tool"
