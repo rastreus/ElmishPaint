@@ -318,7 +318,7 @@
         "Vitest tests verify dithering output for known small input images",
         "Vitest tests verify 6/8 diffusion pattern (not 16/16 Floyd-Steinberg)"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S20-import",

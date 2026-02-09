@@ -194,3 +194,11 @@ Date: 2026-02-09T03:28:17Z
 - Added tests in `src/Update.test.fs`, `src/App.test.fs`, and `src/Components/Toolbar.test.fs` covering shortcut mapping, focused-input suppression, save-dialog prevention, import trigger, and tooltip titles.
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: none.
+## Iteration 20 — S19-dithering — Atkinson dithering algorithm
+Date: 2026-02-09T03:51:56Z
+- Added `src/Canvas/Dithering.fs` with Atkinson dithering (`6/8` error diffusion via six `1/8` neighbors), grayscale conversion (`RGBA` luminance + alpha-over-white), aspect-ratio-preserving scale-to-fit for `512x342`, and pipeline helpers (`ditherToCanvas`, `ditherImageData`).
+- Added `src/Canvas/Dithering.test.fs` coverage for known 3x3 Atkinson output, explicit non-Floyd behavior, threshold offset sensitivity, grayscale conversion correctness, fit-scaling letterboxing, and valid `BitCanvas` output shape.
+- Updated `src/ElmishPaint.fsproj` compile order for `Canvas/Dithering.fs` and `Canvas/Dithering.test.fs`.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Key decision: kept a low-level `atkinson` function (for deterministic small-image tests) and a separate `ditherToCanvas` fit-scaling pipeline to support upcoming import flow wiring in S20.
+- AGENTS.md updates made: none.
