@@ -52,7 +52,7 @@ module Runtime =
     let private isSupportedZoom zoom =
         zoom = 1 || zoom = 2 || zoom = 4 || zoom = 8
 
-    let update msg model : Model * Cmd<Msg> =
+    let rec update msg model : Model * Cmd<Msg> =
         match msg with
         | SelectTool tool -> { model with Tool = tool }, Cmd.none
         | SetEraserBrushSize brushSize ->
@@ -303,43 +303,26 @@ module Runtime =
             else
                 model, Cmd.none
         | ScrollCanvas _ -> model, Cmd.none
-        | KeyDown(key, _) ->
-            match model.Selection with
-            | Some selection when selection.FloatingPixels.IsSome ->
-                match key with
-                | "ArrowUp" ->
-                    let movedSelection = Marquee.move { X = 0; Y = -1 } selection
+        | KeyDown(key, modifiers) ->
+            let normalizedKey = key.ToLowerInvariant ()
+            let hasPrimaryModifier = modifiers.Ctrl || modifiers.Meta
+            let dispatchShortcut msg = update msg model
+
+            let moveSelection delta =
+                match model.Selection with
+                | Some selection when selection.FloatingPixels.IsSome ->
+                    let movedSelection = Marquee.move delta selection
 
                     {
                         model with
                             Selection = Some movedSelection
                     },
                     Cmd.none
-                | "ArrowDown" ->
-                    let movedSelection = Marquee.move { X = 0; Y = 1 } selection
+                | _ -> model, Cmd.none
 
-                    {
-                        model with
-                            Selection = Some movedSelection
-                    },
-                    Cmd.none
-                | "ArrowLeft" ->
-                    let movedSelection = Marquee.move { X = -1; Y = 0 } selection
-
-                    {
-                        model with
-                            Selection = Some movedSelection
-                    },
-                    Cmd.none
-                | "ArrowRight" ->
-                    let movedSelection = Marquee.move { X = 1; Y = 0 } selection
-
-                    {
-                        model with
-                            Selection = Some movedSelection
-                    },
-                    Cmd.none
-                | "Escape" ->
+            let cancelSelection () =
+                match model.Selection with
+                | Some selection when selection.FloatingPixels.IsSome ->
                     let cancelledCanvas = Marquee.cancel selection model.Canvas
 
                     {
@@ -348,7 +331,32 @@ module Runtime =
                             Selection = None
                     },
                     Cmd.none
-                | "Delete"
-                | "Backspace" -> { model with Selection = None }, Cmd.none
                 | _ -> model, Cmd.none
-            | _ -> model, Cmd.none
+
+            if hasPrimaryModifier then
+                match normalizedKey, modifiers.Shift with
+                | "z", false -> dispatchShortcut Undo
+                | "z", true -> dispatchShortcut Redo
+                | "s", false -> dispatchShortcut (ExportPNG Scale1x)
+                | "s", true -> dispatchShortcut (ExportPNG Scale2x)
+                | _ -> model, Cmd.none
+            else
+                match normalizedKey with
+                | "p" -> dispatchShortcut (SelectTool Pencil)
+                | "e" -> dispatchShortcut (SelectTool Eraser)
+                | "l" -> dispatchShortcut (SelectTool Line)
+                | "r" -> dispatchShortcut (SelectTool Rectangle)
+                | "f" -> dispatchShortcut (SelectTool FloodFill)
+                | "m" -> dispatchShortcut (SelectTool Marquee)
+                | "1" -> dispatchShortcut (SetZoom 1)
+                | "2" -> dispatchShortcut (SetZoom 2)
+                | "3" -> dispatchShortcut (SetZoom 4)
+                | "4" -> dispatchShortcut (SetZoom 8)
+                | "arrowup" -> moveSelection { X = 0; Y = -1 }
+                | "arrowdown" -> moveSelection { X = 0; Y = 1 }
+                | "arrowleft" -> moveSelection { X = -1; Y = 0 }
+                | "arrowright" -> moveSelection { X = 1; Y = 0 }
+                | "escape" -> cancelSelection ()
+                | "delete"
+                | "backspace" -> dispatchShortcut ClearSelection
+                | _ -> model, Cmd.none
