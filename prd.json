@@ -209,7 +209,7 @@
         "Rectangle is single undo entry",
         "Vitest tests verify outline and filled rectangle pixel output"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S13-flood-fill",

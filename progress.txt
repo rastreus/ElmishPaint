@@ -125,3 +125,13 @@ Date: 2026-02-09T01:35:15Z
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Gotcha: verification commands that invoke Fable should run sequentially; running standalone `dotnet fable` in parallel with `pnpm test`/`pnpm build` can conflict through shared `src/fable_modules` cleanup.
 - AGENTS.md updates made: none.
+## Iteration 13 — S12-rectangle — Rectangle and Filled Rectangle tools
+Date: 2026-02-09T01:49:41Z
+- Added `src/Tools/Rectangle.fs` with pure rectangle operations for outline and filled modes (`build*Preview` + `commit*`), including global-coordinate checker/dither sampling via `Pattern.Id`.
+- Integrated rectangle tools into `src/Update.fs` mouse flow: drag preview through `Mouse.StrokeCanvas`, commit on `CanvasMouseUp`, single history push per rectangle stroke.
+- Added `src/Tools/Rectangle.test.fs` acceptance tests for hollow 41x41 outline output, solid-black fill, and checker/dither fill output.
+- Expanded `src/Update.test.fs` with rectangle integration coverage for preview visibility, outline commit/geometry, filled checkerboard commit, and single undo-entry behavior.
+- Updated `src/ElmishPaint.fsproj` compile order for new rectangle source/test modules; formatted touched files with Fantomas.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Gotcha discovered: Fable rejects runtime `array2d` inspection APIs (`GetLength`/indexing) in addition to creation helpers; pattern sampling currently uses `Pattern.Id` to stay transpilation-safe.
+- AGENTS.md updates made: added Discovered Patterns note for runtime `array2d` inspection limits in Fable.
