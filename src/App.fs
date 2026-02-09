@@ -34,7 +34,8 @@ type AppRoot =
                                     prop.className "rounded border border-zinc-300 bg-white p-3"
                                     prop.children [
                                         Html.h2 [
-                                            prop.className "mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-700"
+                                            prop.className
+                                                "mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-700"
                                             prop.text "Patterns"
                                         ]
                                         PatternPalette model.Pattern dispatch

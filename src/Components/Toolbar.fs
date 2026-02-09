@@ -134,7 +134,8 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                         prop.onClick (fun _ ->
                             match fileInputRef.current with
                             | Some input -> input.click ()
-                            | None -> ())
+                            | None -> ()
+                        )
                     ]
                     Html.input [
                         prop.testId "toolbar-import-input"

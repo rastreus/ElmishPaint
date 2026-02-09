@@ -12,7 +12,7 @@ Vitest.describe (
         Vitest.test (
             "shows placeholder coordinates when mouse has not moved",
             fun () ->
-                let view = RTL.render (StatusBar (defaultModel ()))
+                let view = RTL.render (StatusBar(defaultModel ()))
                 let coordinates = view.getByTestId ("status-coordinates")
 
                 Vitest.expect(coordinates).toHaveTextContent ("X: -- Y: --")

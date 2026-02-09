@@ -54,8 +54,7 @@ Vitest.describe (
             fun () ->
                 let mutable dispatched: Msg list = []
 
-                let dispatch msg =
-                    dispatched <- dispatched @ [ msg ]
+                let dispatch msg = dispatched <- dispatched @ [ msg ]
 
                 let view = RTL.render (Toolbar (defaultModel ()) dispatch)
                 RTL.fireEvent.click (view.getByTestId ("toolbar-tool-line"))
@@ -74,9 +73,7 @@ Vitest.describe (
                 Vitest.expect(initialView.getByTestId ("toolbar-redo")).toBeDisabled ()
                 initialView.unmount ()
 
-                let undoOnlyModel =
-                    defaultModel ()
-                    |> withHistory [ BitCanvas.create () ] []
+                let undoOnlyModel = defaultModel () |> withHistory [ BitCanvas.create () ] []
 
                 let undoOnlyView = RTL.render (Toolbar undoOnlyModel ignore)
                 Vitest.expect(undoOnlyView.getByTestId ("toolbar-undo")).toBeEnabled ()
@@ -84,8 +81,7 @@ Vitest.describe (
                 undoOnlyView.unmount ()
 
                 let undoRedoModel =
-                    defaultModel ()
-                    |> withHistory [ BitCanvas.create () ] [ BitCanvas.create () ]
+                    defaultModel () |> withHistory [ BitCanvas.create () ] [ BitCanvas.create () ]
 
                 let undoRedoView = RTL.render (Toolbar undoRedoModel ignore)
                 Vitest.expect(undoRedoView.getByTestId ("toolbar-undo")).toBeEnabled ()
@@ -97,8 +93,7 @@ Vitest.describe (
             fun () ->
                 let mutable dispatched: Msg list = []
 
-                let dispatch msg =
-                    dispatched <- dispatched @ [ msg ]
+                let dispatch msg = dispatched <- dispatched @ [ msg ]
 
                 let view = RTL.render (Toolbar (defaultModel ()) dispatch)
 
