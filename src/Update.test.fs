@@ -120,6 +120,55 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "KeyDown maps tool zoom history and export shortcuts",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let primaryModifiers = { noModifiers with Ctrl = true }
+                let primaryShiftModifiers = { primaryModifiers with Shift = true }
+
+                let lineModel, _ = Runtime.update (KeyDown("l", noModifiers)) model
+                let rectangleModel, _ = Runtime.update (KeyDown("r", noModifiers)) lineModel
+                let floodFillModel, _ = Runtime.update (KeyDown("f", noModifiers)) rectangleModel
+                let marqueeModel, _ = Runtime.update (KeyDown("m", noModifiers)) floodFillModel
+                let eraserModel, _ = Runtime.update (KeyDown("e", noModifiers)) marqueeModel
+                let pencilModel, _ = Runtime.update (KeyDown("p", noModifiers)) eraserModel
+
+                Vitest.expect(lineModel.Tool).toEqual (Line)
+                Vitest.expect(rectangleModel.Tool).toEqual (Rectangle)
+                Vitest.expect(floodFillModel.Tool).toEqual (FloodFill)
+                Vitest.expect(marqueeModel.Tool).toEqual (Marquee)
+                Vitest.expect(eraserModel.Tool).toEqual (Eraser)
+                Vitest.expect(pencilModel.Tool).toEqual (Pencil)
+
+                let zoomOneModel, _ = Runtime.update (SetZoom 8) pencilModel
+                let zoomTwoModel, _ = Runtime.update (KeyDown("2", noModifiers)) zoomOneModel
+                let zoomThreeModel, _ = Runtime.update (KeyDown("3", noModifiers)) zoomTwoModel
+                let zoomFourModel, _ = Runtime.update (KeyDown("4", noModifiers)) zoomThreeModel
+                let resetZoomModel, _ = Runtime.update (KeyDown("1", noModifiers)) zoomFourModel
+
+                Vitest.expect(zoomTwoModel.UI.Zoom).toBe (2)
+                Vitest.expect(zoomThreeModel.UI.Zoom).toBe (4)
+                Vitest.expect(zoomFourModel.UI.Zoom).toBe (8)
+                Vitest.expect(resetZoomModel.UI.Zoom).toBe (1)
+
+                let strokeModel = clickStroke 31 10 model
+                Vitest.expect(BitCanvas.getPixel 31 10 strokeModel.Canvas).toEqual (Black)
+
+                let undoneModel, _ = Runtime.update (KeyDown("z", primaryModifiers)) strokeModel
+                let redoneModel, _ = Runtime.update (KeyDown("z", primaryShiftModifiers)) undoneModel
+
+                Vitest.expect(BitCanvas.getPixel 31 10 undoneModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 31 10 redoneModel.Canvas).toEqual (Black)
+
+                let exportOneShortcutResult = Runtime.update (KeyDown("s", primaryModifiers)) model
+                let exportTwoShortcutResult =
+                    Runtime.update (KeyDown("s", primaryShiftModifiers)) model
+
+                Vitest.expect(exportOneShortcutResult).toEqual (Runtime.update (ExportPNG Scale1x) model)
+                Vitest.expect(exportTwoShortcutResult).toEqual (Runtime.update (ExportPNG Scale2x) model)
+        )
+
+        Vitest.test (
             "pencil stroke started on white remains preview-only until mouse up then commits black line",
             fun () ->
                 let model = fst (Runtime.init ())
