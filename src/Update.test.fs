@@ -28,6 +28,18 @@ let private selectEraser brushSize model =
 let private selectLine model =
     Runtime.update (SelectTool Line) model |> fst
 
+let private selectRectangle model =
+    Runtime.update (SelectTool Rectangle) model |> fst
+
+let private selectFilledRectangle model =
+    Runtime.update (SelectTool FilledRectangle) model |> fst
+
+let private patternWithId id = {
+    Id = id
+    Name = id
+    Tile = Unchecked.defaultof<bool array2d>
+}
+
 let private countBlackPixels y canvas =
     [ 0 .. (BitCanvas.Width - 1) ]
     |> List.filter (fun x -> BitCanvas.getPixel x y canvas = Black)
@@ -316,6 +328,57 @@ Vitest.describe (
                 Vitest.expect(BitCanvas.getPixel 0 100 upModel.Canvas).toEqual (Black)
                 Vitest.expect(BitCanvas.getPixel 511 100 upModel.Canvas).toEqual (Black)
                 Vitest.expect(countBlackPixels 100 upModel.Canvas).toBe (512)
+                Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
+        )
+
+        Vitest.test (
+            "rectangle tool shows drag preview and keeps model canvas unchanged until mouse up",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let rectangleModel = selectRectangle model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 10; Y = 10 }, noModifiers)) rectangleModel
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 12; Y = 12 }, noModifiers)) downModel
+
+                Vitest.expect(BitCanvas.getPixel 10 10 moveModel.Canvas).toEqual (White)
+
+                match moveModel.Mouse.StrokeCanvas with
+                | Some previewCanvas ->
+                    Vitest.expect(BitCanvas.getPixel 10 10 previewCanvas).toEqual (Black)
+                    Vitest.expect(BitCanvas.getPixel 12 12 previewCanvas).toEqual (Black)
+                    Vitest.expect(BitCanvas.getPixel 11 11 previewCanvas).toEqual (White)
+                | None -> failwith "expected a rectangle preview canvas"
+        )
+
+        Vitest.test (
+            "filled rectangle commits checkerboard fill on mouse up as a single undo entry",
+            fun () ->
+                let model = fst (Runtime.init ())
+
+                let patternedModel = {
+                    model with
+                        Pattern = patternWithId "checkerboard-50"
+                }
+
+                let filledRectangleModel = selectFilledRectangle patternedModel
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 0; Y = 0 }, noModifiers)) filledRectangleModel
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 3; Y = 3 }, noModifiers)) downModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 3; Y = 3 }, noModifiers)) moveModel
+
+                for y in 0..3 do
+                    for x in 0..3 do
+                        let expected = if ((x + y) &&& 1) = 0 then Black else White
+                        Vitest.expect(BitCanvas.getPixel x y upModel.Canvas).toEqual (expected)
+
                 Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
         )
 
