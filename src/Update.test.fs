@@ -511,6 +511,27 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "arrow KeyDown moves marquee selection by one pixel per press",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 14 14 Black model.Canvas
+                let marqueeModel = selectMarquee model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 14; Y = 14 }, noModifiers)) marqueeModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 14; Y = 14 }, noModifiers)) downModel
+
+                let rightModel, _ = Runtime.update (KeyDown("ArrowRight", noModifiers)) upModel
+                let downKeyModel, _ = Runtime.update (KeyDown("ArrowDown", noModifiers)) rightModel
+
+                match downKeyModel.Selection with
+                | Some selection -> Vitest.expect(selection.Offset).toEqual ({ X = 1; Y = 1 })
+                | None -> failwith "expected marquee selection after arrow movement"
+        )
+
+        Vitest.test (
             "StampSelection merges floating pixels at moved offset and clears active selection",
             fun () ->
                 let model = fst (Runtime.init ())
