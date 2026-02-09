@@ -289,7 +289,7 @@
         "Import and export actions accessible from UI",
         "Layout does not break at 1280x720 and above"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S18-keyboard",

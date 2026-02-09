@@ -176,3 +176,11 @@ Date: 2026-02-09T02:50:58Z
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Runtime verification note: `agent-browser` remains unavailable in this sandbox per established AGENTS.md discovered pattern.
 - AGENTS.md updates made: none.
+## Iteration 18 — S17-toolbar — Toolbar, zoom controls, and status bar
+Date: 2026-02-09T03:08:23Z
+- Added `src/Components/Toolbar.fs` with seven tool buttons (active state via `aria-pressed`), zoom controls, undo/redo buttons bound to `History.canUndo`/`History.canRedo`, eraser brush-size controls, and import/export action controls.
+- Added `src/Components/StatusBar.fs` and rendered coordinate text from `model.Mouse.Current` plus current zoom.
+- Refactored `src/App.fs` layout to responsive container (`max-w-[1280px]`) composing toolbar, pattern palette sidebar, canvas surface, status bar, and active tool/pattern readouts.
+- Added coverage in `src/Components/Toolbar.test.fs`, `src/Components/StatusBar.test.fs`, and expanded `src/App.test.fs` for zoom interaction, coordinate updates on canvas mouse move, undo/redo enablement, and toolbar presence.
+- Updated `src/ElmishPaint.fsproj` compile order for new components/tests and verified all required loops pass (`dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`).
+- AGENTS.md updates made: none.
