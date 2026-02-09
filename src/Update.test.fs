@@ -12,6 +12,13 @@ let private noModifiers = {
     Meta = false
 }
 
+let private clickStroke x y model =
+    let downModel, _ =
+        Runtime.update (CanvasMouseDown({ X = x; Y = y }, noModifiers)) model
+
+    let upModel, _ = Runtime.update (CanvasMouseUp({ X = x; Y = y }, noModifiers)) downModel
+    upModel
+
 Vitest.describe (
     "Runtime.init",
     fun () ->
@@ -138,11 +145,7 @@ Vitest.describe (
             fun () ->
                 let model = fst (Runtime.init ())
 
-                let downModel, _ =
-                    Runtime.update (CanvasMouseDown({ X = 4; Y = 4 }, noModifiers)) model
-
-                let strokeModel, _ =
-                    Runtime.update (CanvasMouseUp({ X = 4; Y = 4 }, noModifiers)) downModel
+                let strokeModel = clickStroke 4 4 model
 
                 Vitest.expect(BitCanvas.getPixel 4 4 strokeModel.Canvas).toEqual (Black)
                 Vitest.expect(List.length strokeModel.History.UndoStack).toBe (1)
@@ -159,5 +162,56 @@ Vitest.describe (
                 Vitest.expect(BitCanvas.getPixel 4 4 redoneModel.Canvas).toEqual (Black)
                 Vitest.expect(List.length redoneModel.History.UndoStack).toBe (1)
                 Vitest.expect(List.length redoneModel.History.RedoStack).toBe (0)
+        )
+
+        Vitest.test (
+            "drawing after undo clears redo stack",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let firstStrokeModel = clickStroke 1 1 model
+                let undoneModel, _ = Runtime.update Undo firstStrokeModel
+
+                Vitest.expect(List.length undoneModel.History.RedoStack).toBe (1)
+
+                let secondStrokeModel = clickStroke 2 2 undoneModel
+                let redoAttemptModel, _ = Runtime.update Redo secondStrokeModel
+
+                Vitest.expect(List.length secondStrokeModel.History.RedoStack).toBe (0)
+                Vitest.expect(redoAttemptModel.Canvas).toEqual (secondStrokeModel.Canvas)
+                Vitest.expect(BitCanvas.getPixel 1 1 secondStrokeModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 2 2 secondStrokeModel.Canvas).toEqual (Black)
+        )
+
+        Vitest.test (
+            "undo and redo are no-ops when history stacks are empty",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let undoModel, undoCmd = Runtime.update Undo model
+                let redoModel, redoCmd = Runtime.update Redo model
+
+                Vitest.expect(undoModel).toEqual (model)
+                Vitest.expect(redoModel).toEqual (model)
+                Vitest.expect(undoCmd).toEqual (Cmd.none)
+                Vitest.expect(redoCmd).toEqual (Cmd.none)
+        )
+
+        Vitest.test (
+            "undo and redo only affect canvas and history state",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let strokeModel = clickStroke 3 3 model
+                let toolModel, _ = Runtime.update (SelectTool Line) strokeModel
+                let zoomModel, _ = Runtime.update (SetZoom 8) toolModel
+
+                let undoModel, _ = Runtime.update Undo zoomModel
+                let redoModel, _ = Runtime.update Redo undoModel
+
+                Vitest.expect(undoModel.Tool).toEqual (Line)
+                Vitest.expect(undoModel.UI.Zoom).toBe (8)
+                Vitest.expect(BitCanvas.getPixel 3 3 undoModel.Canvas).toEqual (White)
+
+                Vitest.expect(redoModel.Tool).toEqual (Line)
+                Vitest.expect(redoModel.UI.Zoom).toBe (8)
+                Vitest.expect(BitCanvas.getPixel 3 3 redoModel.Canvas).toEqual (Black)
         )
 )
