@@ -105,12 +105,12 @@
       "priority": 6,
       "description": "Fix FS0247 namespace collision in CanvasView.fs, fix ImageData constructor TypeError in BitCanvas.toImageData, remove vite-plugin-fable.",
       "acceptanceCriteria": [
-          "dotnet build succeeds with zero errors",
-          "dotnet fable src -e fs.jsx succeeds with zero warnings",
-          "pnpm test passes (including toImageData and CanvasView tests)",
-          "pnpm build succeeds",
-          "App renders in browser without ImageData TypeError",
-          "vite-plugin-fable removed from vite.config.js and package.json"
+        "dotnet build succeeds with zero errors",
+        "dotnet fable src -e fs.jsx succeeds with zero warnings",
+        "pnpm test passes (including toImageData and CanvasView tests)",
+        "pnpm build succeeds",
+        "App renders in browser without ImageData TypeError",
+        "vite-plugin-fable removed from vite.config.js and package.json"
       ],
       "passes": true
     },
@@ -225,7 +225,7 @@
         "Flood fill is single undo entry",
         "Vitest tests verify fill boundaries and pattern application"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S14-patterns",

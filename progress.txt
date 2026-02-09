@@ -135,3 +135,13 @@ Date: 2026-02-09T01:49:41Z
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Gotcha discovered: Fable rejects runtime `array2d` inspection APIs (`GetLength`/indexing) in addition to creation helpers; pattern sampling currently uses `Pattern.Id` to stay transpilation-safe.
 - AGENTS.md updates made: added Discovered Patterns note for runtime `array2d` inspection limits in Fable.
+## Iteration 14 — S13-flood-fill — Flood fill with iterative algorithm
+Date: 2026-02-09T02:01:47Z
+- Added `src/Tools/FloodFill.fs` with iterative (non-recursive) 4-neighbor flood fill using `Stack<Point>` + visited bitmap to handle full 512x342 fills safely.
+- Implemented pattern-aware fill sampling by pattern id (`solid-white`, checker/dither ids, default black) using global coordinates for tiled output.
+- Integrated flood fill into `Runtime.update` on `CanvasMouseDown`: apply fill immediately, push exactly one undo snapshot, and avoid drag-stroke state.
+- Added `src/Tools/FloodFill.test.fs` acceptance coverage for enclosed boundaries, checkerboard pattern application, full-canvas completion, and isolated pixel fill.
+- Extended `src/Update.test.fs` with flood-fill runtime tests for single-undo-entry behavior and selected-pattern application.
+- Updated `src/ElmishPaint.fsproj` compile order for `Tools/FloodFill.fs` and `Tools/FloodFill.test.fs`.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.
