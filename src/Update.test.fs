@@ -16,7 +16,9 @@ let private clickStroke x y model =
     let downModel, _ =
         Runtime.update (CanvasMouseDown({ X = x; Y = y }, noModifiers)) model
 
-    let upModel, _ = Runtime.update (CanvasMouseUp({ X = x; Y = y }, noModifiers)) downModel
+    let upModel, _ =
+        Runtime.update (CanvasMouseUp({ X = x; Y = y }, noModifiers)) downModel
+
     upModel
 
 Vitest.describe (

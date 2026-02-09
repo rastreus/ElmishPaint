@@ -24,8 +24,7 @@ Vitest.describe (
                 let previousCanvas = canvasWithBlackPixel 1 1
 
                 let history =
-                    createHistory 50 [] [ canvasWithBlackPixel 2 2 ]
-                    |> History.push previousCanvas
+                    createHistory 50 [] [ canvasWithBlackPixel 2 2 ] |> History.push previousCanvas
 
                 BitCanvas.setPixel 1 1 White previousCanvas
 
@@ -84,10 +83,7 @@ Vitest.describe (
                 let canvas3 = canvasWithBlackPixel 2 0
 
                 let pushed =
-                    history
-                    |> History.push canvas1
-                    |> History.push canvas2
-                    |> History.push canvas3
+                    history |> History.push canvas1 |> History.push canvas2 |> History.push canvas3
 
                 Vitest.expect(List.length pushed.UndoStack).toBe (2)
 

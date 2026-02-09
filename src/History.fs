@@ -10,15 +10,11 @@ module History =
         else
             stack |> List.truncate maxDepth
 
-    let push (previousCanvas: BitCanvas) history =
-        {
-            history with
-                UndoStack =
-                    BitCanvas.clone previousCanvas
-                    :: history.UndoStack
-                    |> truncate history.MaxDepth
-                RedoStack = []
-        }
+    let push (previousCanvas: BitCanvas) history = {
+        history with
+            UndoStack = BitCanvas.clone previousCanvas :: history.UndoStack |> truncate history.MaxDepth
+            RedoStack = []
+    }
 
     let undo (currentCanvas: BitCanvas) history : BitCanvas * HistoryState =
         match history.UndoStack with
@@ -27,10 +23,7 @@ module History =
             {
                 history with
                     UndoStack = remainingUndo
-                    RedoStack =
-                        BitCanvas.clone currentCanvas
-                        :: history.RedoStack
-                        |> truncate history.MaxDepth
+                    RedoStack = BitCanvas.clone currentCanvas :: history.RedoStack |> truncate history.MaxDepth
             }
         | [] -> currentCanvas, history
 
@@ -40,10 +33,7 @@ module History =
             BitCanvas.clone nextCanvas,
             {
                 history with
-                    UndoStack =
-                        BitCanvas.clone currentCanvas
-                        :: history.UndoStack
-                        |> truncate history.MaxDepth
+                    UndoStack = BitCanvas.clone currentCanvas :: history.UndoStack |> truncate history.MaxDepth
                     RedoStack = remainingRedo
             }
         | [] -> currentCanvas, history
