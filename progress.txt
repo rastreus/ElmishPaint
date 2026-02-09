@@ -104,3 +104,14 @@ Date: 2026-02-09T01:06:24Z
 - Updated `src/ElmishPaint.fsproj` compile order to include `History.fs` and `History.test.fs`; formatted touched F# files via Fantomas.
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - AGENTS.md updates made: none.
+## Iteration 11 — S10-eraser — Eraser tool with configurable brush size
+Date: 2026-02-09T01:21:14Z
+- Added `SetEraserBrushSize` message and update handling so eraser brush size is selectable through `Model.ToolOptions`.
+- Added `src/Tools/Eraser.fs` with square-brush erase operations for `Brush1|Brush2|Brush4|Brush8`; erase path uses Bresenham interpolation via `Algorithms.bresenhamLine`.
+- Integrated eraser into `Runtime.update` mouse flow: stroke preview on down/move, commit on up, history push once per stroke.
+- Added stroke-local brush locking with `MouseState.StrokeBrushSize` so mid-stroke brush size changes do not affect the active stroke and only apply to the next stroke.
+- Added unit coverage in `src/Tools/Eraser.test.fs` (all brush sizes + interpolation trail) and integration coverage in `src/Update.test.fs` (1x1/8x8 behavior, drag continuity, next-stroke brush change, single undo entry).
+- Updated `src/ElmishPaint.fsproj` compile order for new eraser source/test modules; applied Fantomas formatting to touched files.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- Key decision: brush stamps are top-left anchored at cursor coordinates (size x size block from `(x,y)`), with out-of-bounds clipping handled by `BitCanvas.setPixel`.
+- AGENTS.md updates made: none.

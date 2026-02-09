@@ -178,7 +178,7 @@
         "Eraser strokes are single undo entries",
         "Vitest tests verify eraser behavior at each brush size"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S11-line-tool",
