@@ -18,7 +18,8 @@ Vitest.describe (
                     |> Array.map (fun pattern ->
                         let swatch = view.getByTestId $"pattern-swatch-{pattern.Id}"
                         Vitest.expect(swatch).toBeInTheDocument ()
-                        swatch)
+                        swatch
+                    )
 
                 Vitest.expect(swatches.Length).toBe (Patterns.all.Length)
         )

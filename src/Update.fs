@@ -64,12 +64,7 @@ module Runtime =
                     }
             },
             Cmd.none
-        | SelectPattern pattern ->
-            {
-                model with
-                    Pattern = pattern
-            },
-            Cmd.none
+        | SelectPattern pattern -> { model with Pattern = pattern }, Cmd.none
         | CanvasMouseDown(position, modifiers) ->
             let strokeCanvas, strokeBit, strokeBrushSize, committedCanvas, nextHistory, isDown =
                 match model.Tool with

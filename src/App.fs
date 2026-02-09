@@ -24,7 +24,10 @@ type AppRoot =
                 PatternPalette model.Pattern dispatch
                 CanvasView model dispatch
                 Html.p [ prop.testId "active-tool"; prop.text $"Active tool: {model.Tool}" ]
-                Html.p [ prop.testId "active-pattern"; prop.text $"Active pattern: {model.Pattern.Name}" ]
+                Html.p [
+                    prop.testId "active-pattern"
+                    prop.text $"Active pattern: {model.Pattern.Name}"
+                ]
                 Html.button [
                     prop.testId "select-line"
                     prop.text "Select Line Tool"

@@ -14,20 +14,14 @@ let private swatchClass isActive =
 let private PatternPreview (pattern: Pattern) =
     Html.div [
         prop.className "grid grid-cols-8"
-        prop.style [
-            style.width (length.px 24)
-            style.height (length.px 24)
-        ]
+        prop.style [ style.width (length.px 24); style.height (length.px 24) ]
         prop.children [
             for y in 0..7 do
                 for x in 0..7 do
                     Html.div [
                         prop.key $"{pattern.Id}-{x}-{y}"
                         prop.className (if pattern.Tile[y][x] then "bg-black" else "bg-white")
-                        prop.style [
-                            style.width (length.px 3)
-                            style.height (length.px 3)
-                        ]
+                        prop.style [ style.width (length.px 3); style.height (length.px 3) ]
                     ]
         ]
     ]
