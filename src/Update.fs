@@ -58,6 +58,12 @@ module Runtime =
     let update msg model : Model * Cmd<Msg> =
         match msg with
         | SelectTool tool -> { model with Tool = tool }, Cmd.none
+        | SetEraserBrushSize brushSize ->
+            {
+                model with
+                    ToolOptions = { model.ToolOptions with EraserBrushSize = brushSize }
+            },
+            Cmd.none
         | SelectPattern _ -> model, Cmd.none
         | CanvasMouseDown(position, modifiers) ->
             let strokeCanvas, strokeBit =

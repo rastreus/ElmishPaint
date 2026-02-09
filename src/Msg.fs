@@ -4,6 +4,7 @@ open Browser.Types
 
 type Msg =
     | SelectTool of Tool
+    | SetEraserBrushSize of BrushSize
     | SelectPattern of Pattern
     | CanvasMouseDown of position: Point * modifiers: Modifiers
     | CanvasMouseMove of position: Point * modifiers: Modifiers
