@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "scripts": {
     "transpile": "dotnet fable src -e fs.jsx --noCache",
+    "dev": "vite dev",
     "start": "vite dev",
     "build": "pnpm transpile && vite build",
+    "preview": "vite preview",
     "clean": "dotnet fable clean src -e fs.jsx --yes",
     "test": "pnpm clean && pnpm transpile && vitest run"
   },
