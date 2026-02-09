@@ -6,6 +6,7 @@ open Feliz.UseElmish
 open Browser.Dom
 open Browser.Types
 open App.Components.CanvasView
+open App.Components.ImportDialog
 open App.Components.PatternPalette
 open App.Components.Toolbar
 open App.Components.StatusBar
@@ -113,5 +114,8 @@ type AppRoot =
                         ]
                     ]
                 ]
+                match model.ImportPreview with
+                | Some preview -> ImportDialog preview dispatch
+                | None -> React.Fragment []
             ]
         ]

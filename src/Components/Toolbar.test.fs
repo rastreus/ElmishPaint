@@ -3,6 +3,7 @@ module Tests.Components.Toolbar
 open App
 open App.Canvas
 open App.Components.Toolbar
+open Browser.Types
 open Fable.Core.JsInterop
 open Vitest
 
@@ -18,6 +19,9 @@ let private withHistory undoStack redoStack model = {
                 RedoStack = redoStack
         }
 }
+
+let private createFile name mimeType : File =
+    emitJsExpr (name, mimeType) "new File(['x'], $0, { type: $1 })"
 
 Vitest.describe (
     "Toolbar",
@@ -99,6 +103,25 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "dispatches ImportImage when dropping a file on toolbar",
+            fun () ->
+                let mutable dispatched: Msg list = []
+                let dispatch msg = dispatched <- dispatched @ [ msg ]
+                let view = RTL.render (Toolbar (defaultModel ()) dispatch)
+                let file = createFile "dropped.png" "image/png"
+
+                RTL.fireEvent.custom (
+                    "drop",
+                    view.getByTestId ("toolbar-root"),
+                    createObj [ "dataTransfer" ==> createObj [ "files" ==> [| file |] ] ]
+                )
+
+                match dispatched with
+                | [ ImportImage importedFile ] -> Vitest.expect(importedFile.name).toEqual ("dropped.png")
+                | _ -> failwith "expected ImportImage from toolbar drop"
+        )
+
+        Vitest.test (
             "disables undo and redo buttons based on history stack state",
             fun () ->
                 let initialView = RTL.render (Toolbar (defaultModel ()) ignore)
@@ -131,6 +154,13 @@ Vitest.describe (
                 let view = RTL.render (Toolbar (defaultModel ()) dispatch)
 
                 Vitest.expect(view.getByTestId ("toolbar-import-input")).toBeInTheDocument ()
+                Vitest
+                    .expect(view.getByTestId ("toolbar-import-input"))
+                    .toHaveAttribute (
+                        "accept",
+                        ".png,.jpg,.jpeg,.gif,.webp,image/png,image/jpeg,image/gif,image/webp"
+                    )
+
                 Vitest.expect(view.getByTestId ("toolbar-export-1x")).toBeInTheDocument ()
                 Vitest.expect(view.getByTestId ("toolbar-export-2x")).toBeInTheDocument ()
                 Vitest.expect(view.getByTestId ("toolbar-export-4x")).toBeInTheDocument ()

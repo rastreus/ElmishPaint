@@ -2,7 +2,9 @@ module Tests.Update
 
 open App
 open App.Canvas
+open Browser.Types
 open Elmish
+open Fable.Core.JsInterop
 open Vitest
 
 let private noModifiers = {
@@ -74,6 +76,9 @@ let private importPreview fileName thresholdOffset brightness scaledPixels =
         ScaledPixels = scaledPixels
         PreviewCanvas = Dithering.atkinson adjustedPixels BitCanvas.Width BitCanvas.Height thresholdOffset
     }
+
+let private createFile name mimeType : File =
+    emitJsExpr (name, mimeType) "new File(['x'], $0, { type: $1 })"
 
 Vitest.describe (
     "Runtime.init",
@@ -897,5 +902,16 @@ Vitest.describe (
 
                 Vitest.expect(thresholdCount).toBeGreaterThan (initialCount)
                 Vitest.expect(brightenedCount).toBeLessThan (thresholdCount)
+        )
+
+        Vitest.test (
+            "ImportImage ignores unsupported file types",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let unsupportedFile = createFile "notes.txt" "text/plain"
+                let nextModel, cmd = Runtime.update (ImportImage unsupportedFile) model
+
+                Vitest.expect(nextModel).toEqual (model)
+                Vitest.expect(cmd).toEqual (Cmd.none)
         )
 )

@@ -2,6 +2,7 @@ module App.Components.Toolbar
 
 open App
 open Browser.Types
+open Fable.Core.JsInterop
 open Feliz
 
 let private toolButtonClass isActive =
@@ -16,14 +17,32 @@ let private optionButtonClass isActive =
     else
         "rounded border border-zinc-400 bg-white px-2 py-1 text-xs font-semibold text-zinc-900"
 
-let private dispatchImport (dispatch: Msg -> unit) (ev: Event) =
+let private importAccept =
+    ".png,.jpg,.jpeg,.gif,.webp,image/png,image/jpeg,image/gif,image/webp"
+
+let private tryGetFirstFile filesObject =
+    if isNull filesObject then
+        None
+    else
+        let selectedFile: File =
+            emitJsExpr filesObject "($0[0] ?? ($0.item ? $0.item(0) : null))"
+
+        if isNull selectedFile then None else Some selectedFile
+
+let private dispatchImport dispatch filesObject =
+    match tryGetFirstFile filesObject with
+    | Some selectedFile -> dispatch (ImportImage selectedFile)
+    | None -> ()
+
+let private dispatchImportFromInput (dispatch: Msg -> unit) (ev: Event) =
     let target = ev.target :?> HTMLInputElement
+    dispatchImport dispatch (box target.files)
 
-    if not (isNull target.files) then
-        let selectedFile = target.files.item (0)
+let private dispatchImportFromDrop (dispatch: Msg -> unit) (ev: DragEvent) =
+    ev.preventDefault ()
 
-        if not (isNull selectedFile) then
-            dispatch (ImportImage selectedFile)
+    if not (isNull ev.dataTransfer) then
+        dispatchImport dispatch (box ev.dataTransfer.files)
 
 [<ReactComponent>]
 let Toolbar (model: Model) (dispatch: Msg -> unit) =
@@ -34,6 +53,8 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
     Html.section [
         prop.testId "toolbar-root"
         prop.className "flex flex-wrap items-center gap-2 rounded border border-zinc-300 bg-zinc-50 p-2"
+        prop.onDragOver (fun (ev: DragEvent) -> ev.preventDefault ())
+        prop.onDrop (dispatchImportFromDrop dispatch)
         prop.children [
             Html.div [
                 prop.className "flex flex-wrap items-center gap-1"
@@ -154,9 +175,9 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                         prop.testId "toolbar-import-input"
                         prop.ref fileInputRef
                         prop.type'.file
-                        prop.accept "image/*"
+                        prop.accept importAccept
                         prop.className "sr-only"
-                        prop.onChange (dispatchImport dispatch)
+                        prop.onChange (dispatchImportFromInput dispatch)
                     ]
                     Html.button [
                         prop.testId "toolbar-export-1x"
