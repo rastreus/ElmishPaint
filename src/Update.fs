@@ -52,20 +52,6 @@ module Runtime =
     let private isSupportedZoom zoom =
         zoom = 1 || zoom = 2 || zoom = 4 || zoom = 8
 
-    let private clampImportSetting value =
-        if value < -128 then -128
-        elif value > 127 then 127
-        else value
-
-    let private buildPreviewCanvas (scaledPixels: float array) thresholdOffset brightness =
-        let adjustedPixels =
-            scaledPixels
-            |> Array.map (fun value ->
-                let shifted = value + float brightness
-                if shifted < 0.0 then 0.0 elif shifted > 255.0 then 255.0 else shifted)
-
-        Dithering.atkinson adjustedPixels BitCanvas.Width BitCanvas.Height thresholdOffset
-
     let rec update msg model : Model * Cmd<Msg> =
         match msg with
         | SelectTool tool -> { model with Tool = tool }, Cmd.none
@@ -302,7 +288,14 @@ module Runtime =
                 },
                 Cmd.none
             | _ -> model, Cmd.none
-        | ImportImage _ -> model, Cmd.none
+        | ImportImage file ->
+            if ImageImport.isSupportedFile file then
+                let loadPreviewCmd =
+                    Cmd.OfPromise.either ImageImport.loadFromFile file ImportPreviewReady (fun _ -> CancelImport)
+
+                { model with ImportPreview = None }, loadPreviewCmd
+            else
+                model, Cmd.none
         | ImportPreviewReady preview ->
             {
                 model with
@@ -312,27 +305,13 @@ module Runtime =
         | SetImportThreshold thresholdOffset ->
             match model.ImportPreview with
             | Some preview ->
-                let nextThreshold = clampImportSetting thresholdOffset
-
-                let nextPreview = {
-                    preview with
-                        ThresholdOffset = nextThreshold
-                        PreviewCanvas = buildPreviewCanvas preview.ScaledPixels nextThreshold preview.Brightness
-                }
-
+                let nextPreview = ImageImport.withThreshold thresholdOffset preview
                 { model with ImportPreview = Some nextPreview }, Cmd.none
             | None -> model, Cmd.none
         | SetImportBrightness brightness ->
             match model.ImportPreview with
             | Some preview ->
-                let nextBrightness = clampImportSetting brightness
-
-                let nextPreview = {
-                    preview with
-                        Brightness = nextBrightness
-                        PreviewCanvas = buildPreviewCanvas preview.ScaledPixels preview.ThresholdOffset nextBrightness
-                }
-
+                let nextPreview = ImageImport.withBrightness brightness preview
                 { model with ImportPreview = Some nextPreview }, Cmd.none
             | None -> model, Cmd.none
         | ConfirmImport ->
