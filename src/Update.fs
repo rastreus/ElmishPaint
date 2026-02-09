@@ -100,7 +100,7 @@ module Runtime =
 
             { model with Mouse = nextMouse }, Cmd.none
         | CanvasMouseUp(position, modifiers) ->
-            let committedCanvas =
+            let committedCanvas, nextHistory =
                 if model.Mouse.IsDown && model.Tool = Pencil then
                     match model.Mouse.StrokeCanvas, model.Mouse.StrokeBit with
                     | Some strokeCanvas, Some strokeBit ->
@@ -108,10 +108,10 @@ module Runtime =
                         | Some current -> Pencil.drawSegment strokeBit current position strokeCanvas
                         | None -> ()
 
-                        strokeCanvas
-                    | _ -> model.Canvas
+                        strokeCanvas, History.push model.Canvas model.History
+                    | _ -> model.Canvas, model.History
                 else
-                    model.Canvas
+                    model.Canvas, model.History
 
             let nextMouse = {
                 model.Mouse with
@@ -127,6 +127,7 @@ module Runtime =
             {
                 model with
                     Canvas = committedCanvas
+                    History = nextHistory
                     Mouse = nextMouse
             },
             Cmd.none
