@@ -162,7 +162,7 @@
         "Undo/redo does not change tool selection, zoom, or non-canvas state",
         "Vitest tests verify all acceptance criteria"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S10-eraser",

@@ -95,3 +95,12 @@ Date: 2026-02-09T00:44:17Z
 - Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
 - Runtime verification note: `agent-browser` is blocked in this sandbox (`~/.agent-browser` socket dir not writable), so live browser error inspection could not run.
 - AGENTS.md updates made: none.
+## Iteration 10 — S09-undo-redo — Undo/redo with immutable history stacks
+Date: 2026-02-09T01:06:24Z
+- Added `src/History.fs` with immutable history operations: `push`, `undo`, `redo`, `canUndo`, `canRedo`; snapshots are cloned and both stacks are depth-limited to `MaxDepth` (50 in runtime init).
+- Integrated history into `src/Update.fs`: pencil commit on `CanvasMouseUp` pushes pre-stroke canvas; `Undo`/`Redo` now restore canvas snapshots while preserving non-canvas model fields.
+- Added `src/History.test.fs` for history-module semantics (push/undo/redo transitions, redo clearing on push, max-depth truncation, empty-stack no-op behavior).
+- Expanded `src/Update.test.fs` with story-level acceptance coverage: stroke undo/redo round-trip, redo invalidation after new edit, 50 sequential undos, boundary no-ops, and non-canvas state invariants.
+- Updated `src/ElmishPaint.fsproj` compile order to include `History.fs` and `History.test.fs`; formatted touched F# files via Fantomas.
+- Verification passed: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`, `pnpm build`, `dotnet fantomas --check src/`.
+- AGENTS.md updates made: none.
