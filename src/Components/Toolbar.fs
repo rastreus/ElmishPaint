@@ -38,15 +38,15 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
             Html.div [
                 prop.className "flex flex-wrap items-center gap-1"
                 prop.children [
-                    for tool, label, testId in
+                    for tool, label, title, testId in
                         [|
-                            Pencil, "Pencil", "toolbar-tool-pencil"
-                            Eraser, "Eraser", "toolbar-tool-eraser"
-                            Line, "Line", "toolbar-tool-line"
-                            Rectangle, "Rect", "toolbar-tool-rectangle"
-                            FilledRectangle, "Fill", "toolbar-tool-filled-rectangle"
-                            FloodFill, "Fill Area", "toolbar-tool-flood-fill"
-                            Marquee, "Marquee", "toolbar-tool-marquee"
+                            Pencil, "Pencil", "Pencil (P)", "toolbar-tool-pencil"
+                            Eraser, "Eraser", "Eraser (E)", "toolbar-tool-eraser"
+                            Line, "Line", "Line (L)", "toolbar-tool-line"
+                            Rectangle, "Rect", "Rect (R)", "toolbar-tool-rectangle"
+                            FilledRectangle, "Fill", "Fill", "toolbar-tool-filled-rectangle"
+                            FloodFill, "Fill Area", "Fill Area (F)", "toolbar-tool-flood-fill"
+                            Marquee, "Marquee", "Marquee (M)", "toolbar-tool-marquee"
                         |] do
                         let isActive = model.Tool = tool
 
@@ -54,6 +54,7 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                             prop.key testId
                             prop.testId testId
                             prop.type'.button
+                            prop.title title
                             prop.custom ("aria-pressed", if isActive then "true" else "false")
                             prop.className (toolButtonClass isActive)
                             prop.text label
@@ -91,11 +92,19 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                 prop.children [
                     for zoom in [| 1; 2; 4; 8 |] do
                         let isActive = model.UI.Zoom = zoom
+                        let zoomShortcut =
+                            match zoom with
+                            | 1 -> "1"
+                            | 2 -> "2"
+                            | 4 -> "3"
+                            | 8 -> "4"
+                            | _ -> ""
 
                         Html.button [
                             prop.key $"zoom-{zoom}"
                             prop.testId $"toolbar-zoom-{zoom}"
                             prop.type'.button
+                            prop.title $"Zoom {zoom}x ({zoomShortcut})"
                             prop.className (optionButtonClass isActive)
                             prop.text $"{zoom}x"
                             prop.onClick (fun _ -> dispatch (SetZoom zoom))
@@ -108,6 +117,7 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                     Html.button [
                         prop.testId "toolbar-undo"
                         prop.type'.button
+                        prop.title "Undo (Ctrl/Cmd+Z)"
                         prop.className (optionButtonClass false)
                         prop.text "Undo"
                         prop.disabled (not canUndo)
@@ -116,6 +126,7 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                     Html.button [
                         prop.testId "toolbar-redo"
                         prop.type'.button
+                        prop.title "Redo (Ctrl/Cmd+Shift+Z)"
                         prop.className (optionButtonClass false)
                         prop.text "Redo"
                         prop.disabled (not canRedo)
@@ -129,6 +140,7 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                     Html.button [
                         prop.testId "toolbar-import-button"
                         prop.type'.button
+                        prop.title "Import (Ctrl/Cmd+I)"
                         prop.className (optionButtonClass false)
                         prop.text "Import"
                         prop.onClick (fun _ ->
@@ -148,6 +160,7 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                     Html.button [
                         prop.testId "toolbar-export-1x"
                         prop.type'.button
+                        prop.title "Export 1x (Ctrl/Cmd+S)"
                         prop.className (optionButtonClass false)
                         prop.text "Export 1x"
                         prop.onClick (fun _ -> dispatch (ExportPNG Scale1x))
@@ -155,6 +168,7 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                     Html.button [
                         prop.testId "toolbar-export-2x"
                         prop.type'.button
+                        prop.title "Export 2x (Ctrl/Cmd+Shift+S)"
                         prop.className (optionButtonClass false)
                         prop.text "Export 2x"
                         prop.onClick (fun _ -> dispatch (ExportPNG Scale2x))
@@ -162,6 +176,7 @@ let Toolbar (model: Model) (dispatch: Msg -> unit) =
                     Html.button [
                         prop.testId "toolbar-export-4x"
                         prop.type'.button
+                        prop.title "Export 4x"
                         prop.className (optionButtonClass false)
                         prop.text "Export 4x"
                         prop.onClick (fun _ -> dispatch (ExportPNG Scale4x))
