@@ -10,6 +10,7 @@
         <Compile Include="Msg.fs" />
         <Compile Include="Canvas/Algorithms.fs" />
         <Compile Include="Canvas/BitCanvas.fs" />
+        <Compile Include="Canvas/Patterns.fs" />
         <Compile Include="History.fs" />
         <Compile Include="Tools/Pencil.fs" />
         <Compile Include="Tools/Eraser.fs" />
