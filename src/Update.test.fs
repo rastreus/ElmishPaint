@@ -75,6 +75,17 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "SelectPattern changes active pattern and returns Cmd.none",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let nextPattern = patternWithId "checkerboard-50"
+                let nextModel, cmd = Runtime.update (SelectPattern nextPattern) model
+
+                Vitest.expect(nextModel.Pattern.Id).toEqual ("checkerboard-50")
+                Vitest.expect(cmd).toEqual (Cmd.none)
+        )
+
+        Vitest.test (
             "same input produces same output",
             fun () ->
                 let model = fst (Runtime.init ())
