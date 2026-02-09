@@ -371,12 +371,13 @@ git-cliff --output CHANGELOG.md
   `ImageData` constructor signature differences). After any story that touches
   rendering or browser APIs, run `agent-browser errors` (if available) against the live dev
   server to catch runtime `TypeError`/`ReferenceError` that mocks hide.
-- `agent-browser` cannot run inside the Codex sandbox due to macOS
-  `mach_port_rendezvous` restrictions on Chromium process spawning. Runtime
-  browser verification runs as a post-iteration step in `ralph-codex.sh`
-  outside the sandbox. The agent should still write code that would pass
-  runtime checks, and should use the strict `ImageData` shim in
-  `vitest-setup.ts` to catch browser API mismatches during unit tests.
+- `agent-browser` cannot run inside the Codex sandbox. Chromium requires
+  macOS mach port IPC and process forking that the sandbox blocks. Do NOT
+  attempt to run `agent-browser` during in-sandbox verification — it will
+  always fail. Runtime browser verification runs as a post-iteration step
+  in `ralph-codex.sh` outside the sandbox. Focus in-sandbox verification
+  on: `dotnet build`, `dotnet fable src -e fs.jsx`, `pnpm test`,
+  `pnpm build`, `dotnet fantomas --check src/`.
 - Avoid `module A.B.C` declarations when `namespace A.B` is also used elsewhere in the assembly; use explicit `namespace` + nested `module` instead.
 - `vite-plugin-fable` is required for the dev server (`pnpm start` / `vite dev`).
   It ensures fable_modules are compiled before Vite serves pages. Do not remove

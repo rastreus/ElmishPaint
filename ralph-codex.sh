@@ -55,6 +55,7 @@ CODEX_FLAGS=(
   --add-dir "$COREPACK_CACHE"
   --add-dir "$HOME/.pyenv"
   --add-dir "$HOME/Library/Caches/ms-playwright"
+  --add-dir "$HOME/.agent-browser"
   --json
   -o "$CODEX_OUTPUT_FILE"
 )
