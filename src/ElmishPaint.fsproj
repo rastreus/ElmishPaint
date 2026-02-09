@@ -27,6 +27,7 @@
         <Compile Include="Components/CanvasView.test.fs" />
         <Compile Include="Components/PatternPalette.test.fs" />
         <Compile Include="Components/Toolbar.test.fs" />
+        <Compile Include="Components/StatusBar.test.fs" />
         <Compile Include="Tools/Eraser.test.fs" />
         <Compile Include="Tools/Line.test.fs" />
         <Compile Include="Tools/Rectangle.test.fs" />

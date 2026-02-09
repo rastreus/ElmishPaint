@@ -67,4 +67,83 @@ Vitest.describe (
                 Vitest.expect(after.data[0]).toBe (0uy)
             }
         )
+
+        Vitest.test (
+            "renders toolbar controls and status bar",
+            fun () ->
+                let ele = RTL.render (App.AppRoot.App())
+
+                ele.getByTestId ("toolbar-tool-pencil") |> ignore
+                ele.getByTestId ("toolbar-tool-eraser") |> ignore
+                ele.getByTestId ("toolbar-tool-line") |> ignore
+                ele.getByTestId ("toolbar-tool-rectangle") |> ignore
+                ele.getByTestId ("toolbar-tool-filled-rectangle") |> ignore
+                ele.getByTestId ("toolbar-tool-flood-fill") |> ignore
+                ele.getByTestId ("toolbar-tool-marquee") |> ignore
+                ele.getByTestId ("toolbar-zoom-1") |> ignore
+                ele.getByTestId ("toolbar-import-button") |> ignore
+                ele.getByTestId ("toolbar-export-1x") |> ignore
+                ele.getByTestId ("status-coordinates") |> ignore
+        )
+
+        Vitest.test (
+            "zoom controls change canvas dimensions through app state",
+            fun () -> promise {
+                let ele = RTL.render (App.AppRoot.App())
+                let canvas = ele.getByTestId ("paint-canvas")
+                let zoomFour = ele.getByTestId ("toolbar-zoom-4")
+
+                Vitest.expect(canvas).toHaveAttribute ("width", "512")
+                Vitest.expect(canvas).toHaveAttribute ("height", "342")
+
+                do! RTL.act (fun () -> promise { RTL.fireEvent.click (zoomFour) })
+
+                Vitest.expect(canvas).toHaveAttribute ("width", "2048")
+                Vitest.expect(canvas).toHaveAttribute ("height", "1368")
+            }
+        )
+
+        Vitest.test (
+            "status bar coordinates update from canvas mouse move",
+            fun () -> promise {
+                let ele = RTL.render (App.AppRoot.App())
+                let canvas = ele.getByTestId ("paint-canvas")
+                let coordinates = ele.getByTestId ("status-coordinates")
+
+                Vitest.expect(coordinates).toHaveTextContent ("X: -- Y: --")
+
+                do!
+                    RTL.act (fun () -> promise {
+                        RTL.fireEvent.custom ("mouseMove", canvas, createObj [ "clientX" ==> 17; "clientY" ==> 9 ])
+                    })
+
+                Vitest.expect(coordinates).toHaveTextContent ("X: 17 Y: 9")
+            }
+        )
+
+        Vitest.test (
+            "undo and redo buttons enable and disable from history changes",
+            fun () -> promise {
+                let ele = RTL.render (App.AppRoot.App())
+                let canvas = ele.getByTestId ("paint-canvas")
+                let undoButton = ele.getByTestId ("toolbar-undo")
+                let redoButton = ele.getByTestId ("toolbar-redo")
+
+                Vitest.expect(undoButton).toBeDisabled ()
+                Vitest.expect(redoButton).toBeDisabled ()
+
+                do!
+                    RTL.act (fun () -> promise {
+                        RTL.fireEvent.custom ("mouseDown", canvas, createObj [ "clientX" ==> 0; "clientY" ==> 0 ])
+                        RTL.fireEvent.custom ("mouseUp", canvas, createObj [ "clientX" ==> 0; "clientY" ==> 0 ])
+                    })
+
+                Vitest.expect(undoButton).toBeEnabled ()
+                Vitest.expect(redoButton).toBeDisabled ()
+
+                do! RTL.act (fun () -> promise { RTL.fireEvent.click (undoButton) })
+
+                Vitest.expect(redoButton).toBeEnabled ()
+            }
+        )
 )
