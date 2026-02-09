@@ -354,6 +354,27 @@ Vitest.describe (
         )
 
         Vitest.test (
+            "outline rectangle commit creates one undo entry",
+            fun () ->
+                let model = fst (Runtime.init ())
+                let rectangleModel = selectRectangle model
+
+                let downModel, _ =
+                    Runtime.update (CanvasMouseDown({ X = 10; Y = 10 }, noModifiers)) rectangleModel
+
+                let moveModel, _ =
+                    Runtime.update (CanvasMouseMove({ X = 12; Y = 12 }, noModifiers)) downModel
+
+                let upModel, _ =
+                    Runtime.update (CanvasMouseUp({ X = 12; Y = 12 }, noModifiers)) moveModel
+
+                Vitest.expect(BitCanvas.getPixel 10 10 upModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 12 12 upModel.Canvas).toEqual (Black)
+                Vitest.expect(BitCanvas.getPixel 11 11 upModel.Canvas).toEqual (White)
+                Vitest.expect(List.length upModel.History.UndoStack).toBe (1)
+        )
+
+        Vitest.test (
             "filled rectangle commits checkerboard fill on mouse up as a single undo entry",
             fun () ->
                 let model = fst (Runtime.init ())
