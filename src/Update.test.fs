@@ -50,6 +50,31 @@ let private countBlackPixels y canvas =
     |> List.filter (fun x -> BitCanvas.getPixel x y canvas = Black)
     |> List.length
 
+let private countAllBlackPixels canvas =
+    let mutable count = 0
+
+    for y in 0 .. (BitCanvas.Height - 1) do
+        for x in 0 .. (BitCanvas.Width - 1) do
+            if BitCanvas.getPixel x y canvas = Black then
+                count <- count + 1
+
+    count
+
+let private importPreview fileName thresholdOffset brightness scaledPixels =
+    let adjustedPixels =
+        scaledPixels
+        |> Array.map (fun value ->
+            let shifted = value + float brightness
+            if shifted < 0.0 then 0.0 elif shifted > 255.0 then 255.0 else shifted)
+
+    {
+        FileName = fileName
+        ThresholdOffset = thresholdOffset
+        Brightness = brightness
+        ScaledPixels = scaledPixels
+        PreviewCanvas = Dithering.atkinson adjustedPixels BitCanvas.Width BitCanvas.Height thresholdOffset
+    }
+
 Vitest.describe (
     "Runtime.init",
     fun () ->
@@ -788,5 +813,89 @@ Vitest.describe (
 
                 for x in 0..49 do
                     Vitest.expect(BitCanvas.getPixel x 0 model.Canvas).toEqual (White)
+        )
+
+        Vitest.test (
+            "ImportPreviewReady stores preview and ConfirmImport commits as one undo entry",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 2 2 Black model.Canvas
+                let scaledPixels = Array.create (BitCanvas.Width * BitCanvas.Height) 255.0
+                let previewCanvas = BitCanvas.create ()
+                BitCanvas.setPixel 9 7 Black previewCanvas
+
+                let preview = {
+                    importPreview "sample.png" 0 0 scaledPixels with
+                        PreviewCanvas = previewCanvas
+                }
+
+                let readyModel, _ = Runtime.update (ImportPreviewReady preview) model
+
+                match readyModel.ImportPreview with
+                | Some activePreview -> Vitest.expect(activePreview.FileName).toEqual ("sample.png")
+                | None -> failwith "expected active import preview"
+
+                let confirmedModel, _ = Runtime.update ConfirmImport readyModel
+
+                Vitest.expect(confirmedModel.ImportPreview).toEqual (None)
+                Vitest.expect(BitCanvas.getPixel 9 7 confirmedModel.Canvas).toEqual (Black)
+                Vitest.expect(List.length confirmedModel.History.UndoStack).toBe (1)
+
+                let undoneModel, _ = Runtime.update Undo confirmedModel
+                Vitest.expect(BitCanvas.getPixel 9 7 undoneModel.Canvas).toEqual (White)
+                Vitest.expect(BitCanvas.getPixel 2 2 undoneModel.Canvas).toEqual (Black)
+        )
+
+        Vitest.test (
+            "CancelImport clears preview without mutating canvas",
+            fun () ->
+                let model = fst (Runtime.init ())
+                BitCanvas.setPixel 11 11 Black model.Canvas
+                let scaledPixels = Array.create (BitCanvas.Width * BitCanvas.Height) 255.0
+                let preview = importPreview "cancel.png" 0 0 scaledPixels
+
+                let readyModel, _ = Runtime.update (ImportPreviewReady preview) model
+                let cancelledModel, _ = Runtime.update CancelImport readyModel
+
+                Vitest.expect(cancelledModel.ImportPreview).toEqual (None)
+                Vitest.expect(BitCanvas.getPixel 11 11 cancelledModel.Canvas).toEqual (Black)
+                Vitest.expect(List.length cancelledModel.History.UndoStack).toBe (0)
+        )
+
+        Vitest.test (
+            "SetImportThreshold and SetImportBrightness visibly change dithered preview",
+            fun () ->
+                let model = fst (Runtime.init ())
+
+                let scaledPixels =
+                    Array.init (BitCanvas.Width * BitCanvas.Height) (fun index ->
+                        if (index &&& 1) = 0 then 120.0 else 140.0)
+
+                let preview = importPreview "levels.png" 0 0 scaledPixels
+                let readyModel, _ = Runtime.update (ImportPreviewReady preview) model
+
+                let initialCount =
+                    match readyModel.ImportPreview with
+                    | Some activePreview -> countAllBlackPixels activePreview.PreviewCanvas
+                    | None -> failwith "expected initial preview"
+
+                let thresholdModel, _ = Runtime.update (SetImportThreshold 16) readyModel
+                let thresholdCount =
+                    match thresholdModel.ImportPreview with
+                    | Some activePreview ->
+                        Vitest.expect(activePreview.ThresholdOffset).toBe (16)
+                        countAllBlackPixels activePreview.PreviewCanvas
+                    | None -> failwith "expected threshold preview"
+
+                let brightenedModel, _ = Runtime.update (SetImportBrightness 20) thresholdModel
+                let brightenedCount =
+                    match brightenedModel.ImportPreview with
+                    | Some activePreview ->
+                        Vitest.expect(activePreview.Brightness).toBe (20)
+                        countAllBlackPixels activePreview.PreviewCanvas
+                    | None -> failwith "expected brightness preview"
+
+                Vitest.expect(thresholdCount).toBeGreaterThan (initialCount)
+                Vitest.expect(brightenedCount).toBeLessThan (thresholdCount)
         )
 )
