@@ -1,51 +1,71 @@
-# Feliz Template
+# ElmishPaint — an agentic weekend build
 
-This template gets you up and running with a simple web app using [Fable](http://fable.io/) and [Feliz](https://github.com/Zaid-Ajaj/Feliz).
+ElmishPaint is a tiny 1-bit monochrome pixel editor (512×342) built in **F#** with **Fable + Elmish + Feliz v3**, inspired by classic Mac-era paint apps and targeting the Macintosh Classic II’s display constraints.
 
-## Requirements
+This repo’s real purpose wasn’t “ship a paint editor” — it was to learn modern **agent-based coding workflows**. I used OpenAI Codex (model: `gpt-5.3-codex`) and a simple local automation loop (“Ralph Loop”) to implement the project as a sequence of small, test-verified stories.
 
-- [dotnet SDK](https://www.microsoft.com/net/download/core) v8.0 or higher
-- [node.js](https://nodejs.org) v20+ LTS
+## Why this exists
 
-## Editor
+I’d previously used AI (ChatGPT, Claude) primarily through the “chat window” interface and had experience with prompting / context engineering. This weekend project was a hands-on way to explore:
 
-To write and edit your code, you can use either VS Code + [Ionide](http://ionide.io/), Emacs with [fsharp-mode](https://github.com/fsharp/emacs-fsharp-mode), [Rider](https://www.jetbrains.com/rider/) or Visual Studio.
+- how to structure work into tight, testable increments for an agent
+- how to keep the agent grounded with project policy + skills docs
+- how to maintain continuity via progress logs and a PRD backlog
 
-It is recommended to use VS Code, as you can also profit from automated formatting using [Fantomas](https://github.com/fsprojects/Fantomas) and inline autocomplete for tailwindcss!
+## Tech stack
 
-## Development
+- **F#** application logic
+- **Fable 5** → JS transpilation (this repo uses `.fs.jsx` output)
+- **Elmish** update loop
+- **Feliz v3** (breaking changes vs v2 are documented in the Feliz skill)
+- **Vite** for dev/build
+- **Vitest** for unit/integration tests
 
-### Setup
+## Features (MVP)
 
-This needs to be done only once.
+- 512×342 1-bit canvas (packed bit storage)
+- Canvas render + mouse coordinate mapping
+- Zoom levels (1× / 2× / 4× / 8×) + optional pixel grid at higher zoom
+- Core tools implemented as small stories (pencil/eraser/line/rectangle/fill/etc. as present in the repo)
 
-1. `dotnet tool restore` - to install the dotnet tools used in this template
-2. `npm i` - to install the npm dependencies
+> The PRD ([`prd.json`](./prd.json)) is the canonical feature/backlog list.
 
-### Scripts
+## Local development
 
-#### Run
+### Requirements
+- .NET SDK (see [`global.json`](./global.json))
+- Node.js (LTS recommended)
+- pnpm (repo uses `pnpm-lock.yaml`)
 
-Then to start development mode with hot module reloading, run:
-
+### Install
 ```bash
-npm start
+dotnet tool restore
+dotnet paket install
+dotnet build
+pnpm install
 ```
 
-#### Build
+## The “Ralph Loop” workflow (how the agent work was managed)
 
-To build the application and make ready for production:
+This repo includes a lightweight agentic workflow:
 
-```bash
-npm run build
-```
+* [ralph-codex.sh](./ralph-codex.sh) — runs one iteration
+* [prd.json](./prd.json) — backlog / user stories with acceptance criteria
+* [progress.txt](./progress.txt) — append-only log of what each iteration did
+* [AGENTS.md](./AGENTS.md) — project policy (TCR, commit conventions, verification steps)
+* [PROMPT.md](./PROMPT.md) — per-iteration instructions for the agent
+* .agents/skills/**/SKILL.md — tool/framework-specific guardrails (e.g. Feliz v3 syntax, jj usage)
 
-This command builds the application and puts the generated files into the `/dist` directory (can be overwritten in vite.config.js).
+The loop is intentionally simple:
 
-#### Test
+1.	Pick exactly one story from prd.json
+2.	Implement it in small TCR steps
+3.	Run the full verification suite
+4.	Mark the story as passing + append to progress.txt
+5.	Commit
 
-To run the tests in watch mode:
+This kept the agent productive without letting the project sprawl beyond “weekend demo” scope.
 
-```bash
-npm test
-```
+## License
+
+MIT (see [LICENSE](./LICENSE)).

@@ -355,31 +355,17 @@
       "passes": true
     },
     {
-      "id": "S22-bezel",
-      "spec": "Spec 12",
-      "title": "Classic Mac bezel preview mode (nice-to-have)",
+      "id": "S22-weekend-wrap",
+      "spec": "Release",
+      "title": "Weekend wrap-up: GitHub Pages deploy + final docs",
       "priority": 22,
-      "description": "Implement MacBezel.fs. Toggle a presentation mode displaying the 512x342 canvas inside a CSS/SVG rendering of the Macintosh Classic II front bezel. Canvas at 1:1 in the screen area. Drawing tools disabled in preview mode. Toggle via button or shortcut.",
+      "description": "Finalize the weekend demo by configuring GitHub Pages deployment for the repository rastreus/ElmishPaint using GitHub Actions (build with pnpm, upload ./dist, deploy to Pages). Ensure Vite is configured for project pages with base path '/ElmishPaint/'.",
       "acceptanceCriteria": [
-        "Toggle shows canvas inside recognizable Mac Classic II bezel",
-        "Canvas pixels at native 512x342 within bezel screen area",
-        "Drawing tools disabled in preview mode",
-        "Toggle or Escape returns to editor"
-      ],
-      "passes": false
-    },
-    {
-      "id": "S23-e2e-tests",
-      "spec": "Quality",
-      "title": "End-to-end Playwright tests for core workflows",
-      "priority": 23,
-      "description": "Implement E2E tests using Playwright + Expecto. Cover: drawing with pencil tool, undo/redo cycle, zoom in/out, import/export flow. Tests run against Vite dev server.",
-      "acceptanceCriteria": [
-        "E2E test: draw with pencil, verify canvas changed",
-        "E2E test: undo/redo restores canvas state",
-        "E2E test: zoom changes canvas display size",
-        "E2E test: export produces downloadable file",
-        "All E2E tests pass in CI-compatible headless mode"
+        "Vite config sets base to '/ElmishPaint/' so asset and route URLs work under https://rastreus.github.io/ElmishPaint/",
+        "A GitHub Pages deployment workflow exists at .github/workflows/deploy.yml that installs with pnpm, runs the build, uploads ./dist as the Pages artifact, and deploys via GitHub Actions",
+        "package.json has scripts for build and preview (and start/dev as already present) and pnpm build produces the dist/ folder successfully",
+        "pnpm test passes and pnpm build passes after these changes",
+        "The story is marked passes=true after verification is complete"
       ],
       "passes": false
     }
