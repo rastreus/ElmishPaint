@@ -18,7 +18,7 @@ type Tool =
 type Pattern = {
     Id: string
     Name: string
-    Tile: bool array2d
+    Tile: bool array array
 }
 
 type Modifiers = {

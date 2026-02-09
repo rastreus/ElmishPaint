@@ -15,7 +15,7 @@ module Runtime =
     let private defaultPattern = {
         Id = "solid-black"
         Name = "Solid Black"
-        Tile = Unchecked.defaultof<bool array2d>
+        Tile = Unchecked.defaultof<bool array array>
     }
 
     let init () : Model * Cmd<Msg> =

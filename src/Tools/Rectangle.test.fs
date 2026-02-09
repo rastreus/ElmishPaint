@@ -9,7 +9,7 @@ let private blankCanvas () = BitCanvas.create ()
 let private patternWithId id = {
     Id = id
     Name = id
-    Tile = Unchecked.defaultof<bool array2d>
+    Tile = Unchecked.defaultof<bool array array>
 }
 
 let private countBlackInBounds left top right bottom canvas =

@@ -40,7 +40,7 @@ let private selectFloodFill model =
 let private patternWithId id = {
     Id = id
     Name = id
-    Tile = Unchecked.defaultof<bool array2d>
+    Tile = Unchecked.defaultof<bool array array>
 }
 
 let private countBlackPixels y canvas =
