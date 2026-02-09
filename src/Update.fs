@@ -79,6 +79,9 @@ module Runtime =
                     let brushSize = model.ToolOptions.EraserBrushSize
                     let nextStrokeCanvas = Eraser.beginStroke position brushSize model.Canvas
                     Some nextStrokeCanvas, None, Some brushSize
+                | Line ->
+                    let nextStrokeCanvas = Line.buildPreview position position model.Canvas
+                    Some nextStrokeCanvas, None, None
                 | _ -> None, None, None
 
             let nextMouse = {
@@ -109,6 +112,12 @@ module Runtime =
                             Eraser.drawSegment current position strokeBrushSize strokeCanvas
                             Some strokeCanvas, model.Mouse.StrokeBit, Some strokeBrushSize
                         | _ -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
+                    | Line ->
+                        match model.Mouse.Start with
+                        | Some start ->
+                            let previewCanvas = Line.buildPreview start position model.Canvas
+                            Some previewCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
+                        | None -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
                     | _ -> model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
                 else
                     model.Mouse.StrokeCanvas, model.Mouse.StrokeBit, model.Mouse.StrokeBrushSize
@@ -146,6 +155,12 @@ module Runtime =
 
                             strokeCanvas, History.push model.Canvas model.History
                         | _ -> model.Canvas, model.History
+                    | Line ->
+                        match model.Mouse.Start with
+                        | Some start ->
+                            let committedCanvas = Line.commit start position model.Canvas
+                            committedCanvas, History.push model.Canvas model.History
+                        | None -> model.Canvas, model.History
                     | _ -> model.Canvas, model.History
                 else
                     model.Canvas, model.History
