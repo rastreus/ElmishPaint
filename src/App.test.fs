@@ -5,6 +5,11 @@ open Fable.Core.JsInterop
 open Vitest
 open Feliz
 
+let private keydownEvent key ctrl shift meta cancelable : KeyboardEvent =
+    emitJsExpr
+        (key, ctrl, shift, meta, cancelable)
+        "new KeyboardEvent('keydown', { key: $0, ctrlKey: $1, shiftKey: $2, metaKey: $3, cancelable: $4, bubbles: true })"
+
 Vitest.describe (
     "App scaffold",
     fun () ->
@@ -144,6 +149,55 @@ Vitest.describe (
                 do! RTL.act (fun () -> promise { RTL.fireEvent.click (undoButton) })
 
                 Vitest.expect(redoButton).toBeEnabled ()
+            }
+        )
+
+        Vitest.test (
+            "document keydown dispatches shortcuts, skips focused text inputs, and prevents browser save",
+            fun () -> promise {
+                let ele = RTL.render (App.AppRoot.App())
+                let activeTool = ele.getByTestId ("active-tool")
+                let importInput = ele.getByTestId ("toolbar-import-input") :?> HTMLInputElement
+
+                do!
+                    RTL.act (fun () -> promise {
+                        Browser.Dom.document.dispatchEvent (keydownEvent "l" false false false true)
+                        |> ignore
+                    })
+
+                Vitest.expect(activeTool).toHaveTextContent ("Active tool: Line")
+
+                let textInput = Browser.Dom.document.createElement ("input") :?> HTMLInputElement
+                textInput.setAttribute ("type", "text")
+                Browser.Dom.document.body.appendChild textInput |> ignore
+                textInput.focus ()
+
+                do!
+                    RTL.act (fun () -> promise {
+                        Browser.Dom.document.dispatchEvent (keydownEvent "p" false false false true)
+                        |> ignore
+                    })
+
+                Vitest.expect(activeTool).toHaveTextContent ("Active tool: Line")
+
+                Browser.Dom.document.body.removeChild textInput |> ignore
+
+                let mutable importClickCount = 0
+                importInput.addEventListener ("click", fun _ -> importClickCount <- importClickCount + 1)
+
+                do!
+                    RTL.act (fun () -> promise {
+                        Browser.Dom.document.dispatchEvent (keydownEvent "i" true false false true)
+                        |> ignore
+                    })
+
+                Vitest.expect(importClickCount).toBe (1)
+
+                let saveEvent = keydownEvent "s" true false false true
+                let saveDispatched = Browser.Dom.document.dispatchEvent saveEvent
+
+                Vitest.expect(saveDispatched).toBeFalsy ()
+                Vitest.expect(saveEvent.defaultPrevented).toBeTruthy ()
             }
         )
 )
