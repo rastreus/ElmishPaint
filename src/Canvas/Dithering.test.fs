@@ -3,11 +3,10 @@ module Tests.Canvas.Dithering
 open App
 open App.Canvas
 open Browser
-open Fable.Core.JS
 open Fable.Core.JsInterop
 open Vitest
 
-let private createImageData (pixels: Uint8ClampedArray) (width: int) (height: int) =
+let private createImageData (pixels: Fable.Core.JS.Uint8ClampedArray) (width: int) (height: int) =
     emitJsExpr (pixels, width, height) "new ImageData($0, $1, $2)"
 
 let private regionToBits width height (canvas: App.BitCanvas) =
@@ -122,7 +121,7 @@ Vitest.describe (
             "toGrayscale converts RGBA pixels using luminance and alpha-over-white",
             fun () ->
                 let pixels =
-                    Constructors.Uint8ClampedArray.Create [|
+                    Fable.Core.JS.Constructors.Uint8ClampedArray.Create [|
                         255uy
                         0uy
                         0uy
